@@ -65,10 +65,14 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Build web app
+        run: |
+          npm run build:web
+
       - name: Copy web assets
         run: |
-          cp index.html android/app/src/main/assets/web/
-          cp -r src/* android/app/src/main/assets/web/src/
+          mkdir -p android/app/src/main/assets/web
+          cp -r www/* android/app/src/main/assets/web/
 
       - name: Build Debug APK
         id: debug

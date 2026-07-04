@@ -2,72 +2,72 @@
 
 A production-ready Android application and web platform for Instagram content creators.
 
-## Architecture
+## Project Structure
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  Android App (Native Shell)              │
-├─────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │ Splash Screen│  │  Settings   │  │  Share Sheet    │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
-├─────────────────────────────────────────────────────────┤
-│                   WebView (Business Logic)              │
-├─────────────────────────────────────────────────────────┤
-│  ┌──────────────────────────────────────────────────┐   │
-│  │           Research Engine (Internet-First)         │   │
-│  │  ProviderManager → ResearchCache → Generator      │   │
-│  └──────────────────────────────────────────────────┘   │
-├─────────────────────────────────────────────────────────┤
-│  ┌──────────────────────────────────────────────────┐   │
-│  │           Intelligence Engine (AI)                 │   │
-│  │  SupremeGenerator → OriginalityEngine → Editor    │   │
-│  └──────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────┘
+ig-toolkit/
+├── www/                 # Web app (standalone, browser-ready)
+│   ├── index.html
+│   └── src/
+├── android/            # Android native shell
+│   └── app/src/main/assets/web/  # Copied from www/
+├── src/                # Source files
+├── package.json
+└── .github/workflows/  # CI/CD
 ```
 
 ## Quick Start
 
-### Web App
+### Web Development
 ```bash
 npm install
-npm start
+npm start        # Run web app in browser (localhost:8080)
+npm run dev      # Run with CORS enabled
 ```
 
-### Android App
+### Android Development
 ```bash
-npx cap sync android
-npx cap open android
+npm run dev:android   # Build APK
+npm run open:android  # Open in Android Studio
 ```
 
-## Build
-
-### Debug APK
+### Build Commands
 ```bash
-cd android
-./gradlew assembleDebug
+npm run build:web     # Build web app (copies src/ to www/)
+npm run build:android # Sync web to Android
 ```
-APK: `android/app/build/outputs/apk/debug/app-debug.apk`
+
+## Architecture
+
+```
+┌─────────────────────┐     ┌─────────────────────┐
+│   Web Browser       │     │   Android App       │
+│   localhost:8080    │     │   (WebView)        │
+└──────────┬──────────┘     └──────────┬──────────┘
+           │                           │
+           ▼                           ▼
+      ┌────────────────────────────────┐
+      │           www/ (web app)        │
+      │  - Research Engine              │
+      │  - Intelligence Engine         │
+      │  - UI Components               │
+      └────────────────────────────────┘
+```
+
+## Development Workflow
+
+1. **Develop in browser** - `npm start` → `localhost:8080`
+2. **Test changes** - Edit `src/` files → Refresh browser
+3. **Build web** - `npm run build:web` (copies to www/)
+4. **Build APK** - `npm run dev:android`
 
 ## GitHub Actions
 
 CI/CD runs on every push:
-- Lint code
-- Build Debug APK
-- Build Release APK
-- Upload artifacts
-
-## Project Structure
-
-```
-├── index.html           # Web app entry
-├── src/                # Web app source
-│   ├── core/          # Intelligence & Research engines
-│   ├── generators/     # Content generators
-│   └── ui/            # UI components
-├── android/           # Android native shell
-└── .github/workflows/ # CI/CD
-```
+1. Build web app (`npm run build:web`)
+2. Copy to Android assets
+3. Build Debug APK
+4. Upload artifacts
 
 ## License
 

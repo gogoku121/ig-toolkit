@@ -1,16 +1,16 @@
 {
   "name": "ig-toolkit",
   "version": "2.0.0",
-  "description": "AI Instagram Business Toolkit - Generate captions, hashtags, reels ideas, product descriptions, story posts, and reply suggestions",
+  "description": "AI Instagram Business Toolkit",
   "type": "module",
-  "main": "src/index.js",
   "scripts": {
-    "start": "http-server -p 8080 -c-1",
-    "dev": "http-server -p 8080 -c-1 --cors"
+    "start": "cd www && http-server -p 8080 -c-1",
+    "dev": "cd www && http-server -p 8080 -c-1 --cors",
+    "dev:android": "npx cap sync android && cd android && ./gradlew assembleDebug",
+    "build:web": "rm -rf www && cp -r src www && cp index.html www/",
+    "build:android": "npx cap sync android",
+    "open:android": "npx cap open android"
   },
-  "keywords": ["instagram", "social-media", "content-generator", "toolkit"],
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
     "http-server": "^14.1.1"
   }
