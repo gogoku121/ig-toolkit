@@ -19,6 +19,9 @@ class MainViewModel : ViewModel() {
     // Research mode
     val researchMode: StateFlow<ResearchMode> = researchEngine.currentMode
     
+    // Research status (detailed)
+    val researchStatus: StateFlow<ResearchEngine.ResearchStatus> = researchEngine.researchStatus
+    
     // Provider health
     val providerHealth: StateFlow<Map<String, ProviderHealth>> = researchEngine.providerHealth
     
@@ -41,6 +44,10 @@ class MainViewModel : ViewModel() {
     private val _showDebugPanel = MutableStateFlow(false)
     val showDebugPanel: StateFlow<Boolean> = _showDebugPanel.asStateFlow()
     
+    // Research phase text for UI
+    private val _researchPhase = MutableStateFlow("Ready")
+    val researchPhase: StateFlow<String> = _researchPhase.asStateFlow()
+    
     data class UiState(
         val topic: String = "",
         val personality: Personality = Personality.VIRAL_CREATOR,
@@ -48,7 +55,8 @@ class MainViewModel : ViewModel() {
         val versions: Int = 3,
         val isLoading: Boolean = false,
         val error: String? = null,
-        val copiedCaption: Boolean = false
+        val copiedCaption: Boolean = false,
+        val modeExplanation: String = "" // Why are we in this mode?
     )
     
     fun updateTopic(topic: String) {
@@ -71,6 +79,9 @@ class MainViewModel : ViewModel() {
         _showDebugPanel.value = !_showDebugPanel.value
     }
     
+    /**
+     * Generate captions - research is ALWAYS performed first unless offline
+     */
     fun generate() {
         val state = _uiState.value
         if (state.topic.isBlank()) {
@@ -79,14 +90,27 @@ class MainViewModel : ViewModel() {
         }
         
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update { it.copy(isLoading = true, error = null, modeExplanation = "") }
             
             try {
-                // Research phase
+                // PHASE 1: Research is MANDATORY unless offline
+                _researchPhase.value = "Researching..."
+                
                 val research = researchEngine.research(state.topic)
                 _currentResearch.value = research
                 
-                // Generate captions
+                // Update UI with mode explanation
+                val modeExplanation = when (research.source) {
+                    "live_research" -> "Using live research from ${research.provider}"
+                    "cached_research" -> "Using cached research (live failed)"
+                    else -> "OFFLINE: ${researchEngine.researchStatus.value.fallbackReason ?: "No research available"}"
+                }
+                
+                _uiState.update { it.copy(modeExplanation = modeExplanation) }
+                
+                // PHASE 2: Generate captions from research
+                _researchPhase.value = "Generating captions..."
+                
                 val request = GenerationRequest(
                     topic = state.topic,
                     personality = state.personality,
@@ -94,6 +118,7 @@ class MainViewModel : ViewModel() {
                     versions = state.versions
                 )
                 
+                // Pass research to generator - it should use it!
                 val captions = captionGenerator.generateMultiple(request, research, state.versions)
                 _generatedCaptions.value = captions
                 
@@ -101,14 +126,17 @@ class MainViewModel : ViewModel() {
                 _selectedCaption.value = captions.firstOrNull()
                 
                 _uiState.update { it.copy(isLoading = false) }
+                _researchPhase.value = "Complete"
                 
             } catch (e: Exception) {
                 _uiState.update { 
                     it.copy(
                         isLoading = false, 
-                        error = e.message ?: "Generation failed"
+                        error = e.message ?: "Generation failed",
+                        modeExplanation = "Error: ${e.message}"
                     )
                 }
+                _researchPhase.value = "Error"
             }
         }
     }
@@ -118,12 +146,7 @@ class MainViewModel : ViewModel() {
     }
     
     fun copyCaption(caption: GenerationResult) {
-        // In real app, would use ClipboardManager
         _uiState.update { it.copy(copiedCaption = true) }
-    }
-    
-    fun copyHashtags(hashtags: List<String>) {
-        // In real app, would use ClipboardManager
     }
     
     fun clearError() {
@@ -132,5 +155,12 @@ class MainViewModel : ViewModel() {
     
     fun getDebugInfo(): ResearchEngine.DebugInfo {
         return researchEngine.getDebugInfo()
+    }
+    
+    /**
+     * Set API key for a provider
+     */
+    fun setApiKey(providerKey: String, apiKey: String) {
+        researchEngine.setApiKey(providerKey, apiKey)
     }
 }

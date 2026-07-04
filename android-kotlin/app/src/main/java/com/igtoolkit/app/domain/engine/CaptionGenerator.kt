@@ -47,29 +47,37 @@ class CaptionGenerator {
      * Generate captions based on research data
      */
     fun generate(request: GenerationRequest, research: ResearchResult?): GenerationResult {
-        val researchUsed = research != null && research.qualityScore > 0
+        // Determine if we have quality research
+        val hasQualityResearch = research != null && 
+            research.source != "local_knowledge" && 
+            research.qualityScore >= 40
         
+        // Build caption based on research quality
         val caption = buildString {
-            // Opening hook
-            append(generateHook(request.topic, research))
+            // Opening hook - different based on research quality
+            if (hasQualityResearch) {
+                append(generateHook(request.topic, research))
+            } else {
+                append(generateFallbackHook(request.topic))
+            }
             append("\n\n")
             
-            // Main content
-            append(generateMainContent(request, research))
+            // Main content - uses research if available
+            append(generateMainContent(request, research, hasQualityResearch))
             append("\n\n")
             
             // Call to action
             append(ctaPhrases.random())
         }
         
-        val hashtags = generateHashtags(request.topic, research)
+        val hashtags = generateHashtags(request.topic, research, hasQualityResearch)
         
         return GenerationResult(
             caption = caption.trim(),
             hashtags = hashtags,
             version = 1,
-            quality = if (researchUsed) research!!.qualityScore else 30,
-            researchUsed = researchUsed
+            quality = research?.qualityScore ?: 0,
+            researchUsed = hasQualityResearch
         )
     }
     
@@ -99,18 +107,35 @@ class CaptionGenerator {
         return openingHooks.random() + " ${topic.lowercase()}"
     }
     
-    private fun generateMainContent(request: GenerationRequest, research: ResearchResult?): String {
+    private fun generateMainContent(request: GenerationRequest, research: ResearchResult?, useResearch: Boolean): String {
         val topic = request.topic
         val personality = request.personality
         
+        // If research is poor quality, don't use it
+        val effectiveResearch = if (useResearch) research else null
+        
         return when (personality) {
-            Personality.VIRAL_CREATOR -> generateViralContent(topic, research)
-            Personality.LUXURY_BRAND -> generateLuxuryContent(topic, research)
-            Personality.EDUCATIONAL -> generateEducationalContent(topic, research)
-            Personality.STORYTELLER -> generateStoryContent(topic, research)
-            Personality.FUNNY -> generateFunnyContent(topic, research)
-            else -> generateStandardContent(topic, research)
+            Personality.VIRAL_CREATOR -> generateViralContent(topic, effectiveResearch)
+            Personality.LUXURY_BRAND -> generateLuxuryContent(topic, effectiveResearch)
+            Personality.EDUCATIONAL -> generateEducationalContent(topic, effectiveResearch)
+            Personality.STORYTELLER -> generateStoryContent(topic, effectiveResearch)
+            Personality.FUNNY -> generateFunnyContent(topic, effectiveResearch)
+            else -> generateStandardContent(topic, effectiveResearch)
         }
+    }
+    
+    /**
+     * Fallback hook when no research is available
+     */
+    private fun generateFallbackHook(topic: String): String {
+        val hooks = listOf(
+            "Here's what you need to know about ${topic.lowercase()}:",
+            "The truth about ${topic.lowercase()} might surprise you.",
+            "Everything you're about to read on ${topic.lowercase()} is worth saving.",
+            "Let me explain why ${topic.lowercase()} matters more than you think.",
+            "This is your complete guide to ${topic.lowercase()}."
+        )
+        return hooks.random()
     }
     
     private fun generateViralContent(topic: String, research: ResearchResult?): String {
@@ -233,7 +258,7 @@ class CaptionGenerator {
         }
     }
     
-    private fun generateHashtags(topic: String, research: ResearchResult?): List<String> {
+    private fun generateHashtags(topic: String, research: ResearchResult?, useResearch: Boolean): List<String> {
         val hashtags = mutableListOf<String>()
         
         // Add topic-based hashtags
@@ -253,8 +278,13 @@ class CaptionGenerator {
         ))
         
         // Add research-based hashtags if available
-        research?.entities?.take(2)?.forEach { ent: Entity ->
-            hashtags.add("#${ent.name.replace(" ", "")}")
+        if (useResearch) {
+            research?.entities?.take(2)?.forEach { ent: Entity ->
+                hashtags.add("#${ent.name.replace(" ", "")}")
+            }
+            research?.keywords?.take(3)?.forEach { kw: Keyword ->
+                hashtags.add("#${kw.word.replaceFirstChar { it.uppercase() }}")
+            }
         }
         
         return hashtags.distinct().take(15)

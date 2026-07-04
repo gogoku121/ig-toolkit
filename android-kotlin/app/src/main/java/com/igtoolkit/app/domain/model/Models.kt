@@ -155,3 +155,65 @@ enum class Goal(val displayName: String) {
     GENERATE_SHARES("Generate Shares"),
     GENERATE_SAVES("Generate Saves")
 }
+
+/**
+ * Knowledge Graph - Structured representation of research data
+ */
+data class KnowledgeGraph(
+    val topic: String = "",
+    val source: String = "unknown",
+    val confidence: Int = 0,
+    val nodes: List<KnowledgeNode> = emptyList(),
+    val relationships: List<KnowledgeRelationship> = emptyList(),
+    val facts: List<Fact> = emptyList(),
+    val opinions: List<Opinion> = emptyList(),
+    val tips: List<ActionableTip> = emptyList()
+)
+
+data class KnowledgeNode(
+    val id: String,
+    val type: NodeType,
+    val label: String,
+    val properties: Map<String, String> = emptyMap()
+)
+
+enum class NodeType {
+    ENTITY, TOPIC, TREND, QUESTION, PAIN_POINT, PRODUCT, COMPANY, PERSON, KEYWORD
+}
+
+data class KnowledgeRelationship(
+    val sourceId: String,
+    val targetId: String,
+    val type: String
+)
+
+data class Fact(
+    val text: String,
+    val source: String = "",
+    val verified: Boolean = false
+)
+
+data class Opinion(
+    val text: String,
+    val sentiment: String = "neutral",
+    val source: String = ""
+)
+
+data class ActionableTip(
+    val text: String,
+    val category: String = "general"
+)
+
+/**
+ * Research Summary - Human-readable summary of research
+ */
+data class ResearchSummary(
+    val topic: String,
+    val source: String,
+    val qualityScore: Int,
+    val summary: String,
+    val keyFindings: List<String>,
+    val mainQuestion: String?,
+    val trendingTopics: List<String>,
+    val painPoints: List<String>
+)

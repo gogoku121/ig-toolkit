@@ -34,6 +34,10 @@ class ResearchCache {
         return System.currentTimeMillis() - entry.timestamp > ttlMs
     }
     
+    fun getTimestamp(query: String): Long {
+        return cache[query.lowercase()]?.timestamp ?: 0L
+    }
+    
     fun clear() {
         cache.clear()
     }

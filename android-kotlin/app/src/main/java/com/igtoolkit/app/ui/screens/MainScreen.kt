@@ -1,6 +1,7 @@
 package com.igtoolkit.app.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.igtoolkit.app.domain.engine.ResearchEngine
 import com.igtoolkit.app.domain.model.*
 import com.igtoolkit.app.ui.MainViewModel
 
@@ -26,11 +28,12 @@ fun MainScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val researchMode by viewModel.researchMode.collectAsStateWithLifecycle()
+    val researchStatus by viewModel.researchStatus.collectAsStateWithLifecycle()
     val providerHealth by viewModel.providerHealth.collectAsStateWithLifecycle()
     val generatedCaptions by viewModel.generatedCaptions.collectAsStateWithLifecycle()
     val selectedCaption by viewModel.selectedCaption.collectAsStateWithLifecycle()
-    val showDebugPanel by viewModel.showDebugPanel.collectAsStateWithLifecycle()
     val currentResearch by viewModel.currentResearch.collectAsStateWithLifecycle()
+    val researchPhase by viewModel.researchPhase.collectAsStateWithLifecycle()
     
     var showDebugSheet by remember { mutableStateOf(false) }
     
@@ -59,6 +62,16 @@ fun MainScreen(
                 .padding(padding)
                 .padding(16.dp)
         ) {
+            // RESEARCH STATUS BAR - Always visible
+            ResearchStatusBar(
+                researchMode = researchMode,
+                researchStatus = researchStatus,
+                providerHealth = providerHealth,
+                modeExplanation = uiState.modeExplanation
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
             // Topic Input
             OutlinedTextField(
                 value = uiState.topic,
@@ -109,18 +122,39 @@ fun MainScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.width(8.dp))
+                    Text(researchPhase)
+                } else {
+                    Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Research & Generate")
                 }
-                Text(if (uiState.isLoading) "Researching..." else "Generate Captions")
             }
             
             // Error display
             uiState.error?.let { error ->
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Error,
+                            null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            error,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
             }
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -193,25 +227,148 @@ fun MainScreen(
     }
 }
 
+/**
+ * Research Status Bar - Shows current research state
+ */
+@Composable
+fun ResearchStatusBar(
+    researchMode: ResearchMode,
+    researchStatus: ResearchEngine.ResearchStatus,
+    providerHealth: Map<String, ProviderHealth>,
+    modeExplanation: String
+) {
+    val (bgColor, borderColor, icon, statusText) = when (researchMode) {
+        ResearchMode.ONLINE -> Quadruple(
+            MaterialTheme.colorScheme.primaryContainer,
+            MaterialTheme.colorScheme.primary,
+            Icons.Default.Wifi,
+            "LIVE RESEARCH"
+        )
+        ResearchMode.CACHE -> Quadruple(
+            MaterialTheme.colorScheme.tertiaryContainer,
+            MaterialTheme.colorScheme.tertiary,
+            Icons.Default.Storage,
+            "CACHED"
+        )
+        ResearchMode.MEMORY -> Quadruple(
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.secondary,
+            Icons.Default.Memory,
+            "MEMORY"
+        )
+        ResearchMode.OFFLINE -> Quadruple(
+            MaterialTheme.colorScheme.errorContainer,
+            MaterialTheme.colorScheme.error,
+            Icons.Default.CloudOff,
+            "OFFLINE MODE"
+        )
+    }
+    
+    Card(
+        colors = CardDefaults.cardColors(containerColor = bgColor),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, tint = borderColor)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    statusText,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = borderColor,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Mode explanation
+            if (modeExplanation.isNotEmpty()) {
+                Text(
+                    modeExplanation,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+            
+            // Research phase if active
+            if (researchStatus.isResearching) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        researchStatus.currentPhase,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+            
+            // Provider info if researching
+            researchStatus.providerInUse?.let { provider ->
+                Text(
+                    "Provider: $provider • Latency: ${researchStatus.qualityScore}ms",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // Stats if research complete
+            if (researchStatus.resultsCount > 0) {
+                Text(
+                    "Results: ${researchStatus.resultsCount} • Entities: ${researchStatus.entitiesCount} • Insights: ${researchStatus.insightsCount}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // Fallback reason if offline
+            researchStatus.fallbackReason?.let { reason ->
+                Text(
+                    "Reason: $reason",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+}
+
+data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
 @Composable
 fun ResearchModeChip(mode: ResearchMode) {
-    val (color, text) = when (mode) {
-        ResearchMode.ONLINE -> MaterialTheme.colorScheme.primary to "ONLINE"
-        ResearchMode.CACHE -> MaterialTheme.colorScheme.tertiary to "CACHE"
-        ResearchMode.MEMORY -> MaterialTheme.colorScheme.secondary to "MEMORY"
-        ResearchMode.OFFLINE -> MaterialTheme.colorScheme.error to "OFFLINE"
+    val (color, text, icon) = when (mode) {
+        ResearchMode.ONLINE -> Triple(MaterialTheme.colorScheme.primary, "ONLINE", Icons.Default.Wifi)
+        ResearchMode.CACHE -> Triple(MaterialTheme.colorScheme.tertiary, "CACHE", Icons.Default.Storage)
+        ResearchMode.MEMORY -> Triple(MaterialTheme.colorScheme.secondary, "MEMORY", Icons.Default.Memory)
+        ResearchMode.OFFLINE -> Triple(MaterialTheme.colorScheme.error, "OFFLINE", Icons.Default.CloudOff)
     }
     
     Surface(
         color = color.copy(alpha = 0.2f),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Text(
-            text = text,
-            color = color,
-            style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, null, tint = color, modifier = Modifier.size(14.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text,
+                color = color,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
@@ -266,12 +423,12 @@ fun PersonalitySelector(
 
 @Composable
 fun ResearchQualityIndicator(research: ResearchResult) {
-    val color = when {
-        research.qualityScore >= 70 -> MaterialTheme.colorScheme.primary
-        research.qualityScore >= 50 -> MaterialTheme.colorScheme.tertiary
-        research.qualityScore >= 30 -> MaterialTheme.colorScheme.secondary
-        research.qualityScore > 0 -> MaterialTheme.colorScheme.error
-        else -> MaterialTheme.colorScheme.outline
+    val color = when (research.qualityLevel) {
+        QualityLevel.EXCELLENT -> MaterialTheme.colorScheme.primary
+        QualityLevel.GOOD -> MaterialTheme.colorScheme.tertiary
+        QualityLevel.ADEQUATE -> MaterialTheme.colorScheme.secondary
+        QualityLevel.POOR -> MaterialTheme.colorScheme.error
+        QualityLevel.OFFLINE -> MaterialTheme.colorScheme.outline
     }
     
     Row(
@@ -282,7 +439,11 @@ fun ResearchQualityIndicator(research: ResearchResult) {
             .padding(12.dp)
     ) {
         Icon(
-            if (research.qualityScore >= 70) Icons.Default.Verified else Icons.Default.Analytics,
+            when (research.qualityLevel) {
+                QualityLevel.EXCELLENT -> Icons.Default.Verified
+                QualityLevel.OFFLINE -> Icons.Default.CloudOff
+                else -> Icons.Default.Analytics
+            },
             contentDescription = null,
             tint = color
         )
@@ -291,25 +452,23 @@ fun ResearchQualityIndicator(research: ResearchResult) {
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                "Research Quality: ${research.qualityLevel.name}",
+                "Research: ${research.qualityLevel.name}",
                 style = MaterialTheme.typography.labelMedium,
                 color = color
             )
             Text(
-                "Provider: ${research.provider} • Score: ${research.qualityScore}",
+                "${research.results.size} results • ${research.entities.size} entities • ${research.insights.size} insights",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
-        if (research.qualityScore > 0) {
-            Text(
-                "${research.qualityScore}",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
-        }
+        Text(
+            "${research.qualityScore}",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = color
+        )
     }
 }
 
@@ -341,19 +500,29 @@ fun CaptionCard(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 if (caption.researchUsed) {
-                    Icon(
-                        Icons.Default.Wifi,
-                        "Research used",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            "RESEARCH",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
                 } else {
-                    Icon(
-                        Icons.Default.WifiOff,
-                        "Local only",
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.outline
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            "OFFLINE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
                 }
             }
             
@@ -395,10 +564,11 @@ fun DebugBottomSheet(
 ) {
     val debugInfo = remember { viewModel.getDebugInfo() }
     val providerHealth by viewModel.providerHealth.collectAsStateWithLifecycle()
+    val debugLog by viewModel.debugLog.collectAsStateWithLifecycle()
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState()
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ) {
         Column(
             modifier = Modifier
@@ -413,42 +583,131 @@ fun DebugBottomSheet(
             
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Mode
-            Text("Mode: ${debugInfo.mode.name}", style = MaterialTheme.typography.bodyLarge)
-            Text("Last Provider: ${debugInfo.lastProvider ?: "none"}", style = MaterialTheme.typography.bodyMedium)
-            Text("Quality Threshold: ${debugInfo.qualityThreshold}", style = MaterialTheme.typography.bodyMedium)
+            // Current Status
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = when (debugInfo.mode) {
+                        ResearchMode.ONLINE -> MaterialTheme.colorScheme.primaryContainer
+                        ResearchMode.CACHE -> MaterialTheme.colorScheme.tertiaryContainer
+                        ResearchMode.MEMORY -> MaterialTheme.colorScheme.secondaryContainer
+                        ResearchMode.OFFLINE -> MaterialTheme.colorScheme.errorContainer
+                    }
+                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text(
+                        "Mode: ${debugInfo.mode.name}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text("Last Provider: ${debugInfo.lastProvider ?: "none"}")
+                    Text("Latency: ${debugInfo.lastProviderLatency}ms")
+                    Text("Quality Threshold: ${debugInfo.qualityThreshold}")
+                    debugInfo.researchStatus.fallbackReason?.let {
+                        Text("Fallback: $it", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
             // Provider Health
-            Text("Provider Health", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Provider Health",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
             providerHealth.forEach { (key, health) ->
-                Row(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 4.dp)
                 ) {
-                    Icon(
-                        if (health.isHealthy) Icons.Default.CheckCircle else Icons.Default.Error,
-                        null,
-                        tint = if (health.isHealthy) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(key, modifier = Modifier.weight(1f))
-                    Text(
-                        if (health.apiKeyConfigured) "🔑" else "⚠️",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("${health.successRate}%", style = MaterialTheme.typography.bodySmall)
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                if (health.isHealthy) Icons.Default.CheckCircle else Icons.Default.Error,
+                                null,
+                                tint = when {
+                                    health.isHealthy -> MaterialTheme.colorScheme.primary
+                                    else -> MaterialTheme.colorScheme.error
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(key, fontWeight = FontWeight.Bold)
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(health.status.name)
+                        }
+                        Divider(modifier = Modifier.padding(vertical = 8.dp))
+                        Row {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("API Key", style = MaterialTheme.typography.labelSmall)
+                                Text(if (health.apiKeyConfigured) "✅ Configured" else "❌ Missing")
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Success Rate", style = MaterialTheme.typography.labelSmall)
+                                Text("${health.successRate}%")
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Latency", style = MaterialTheme.typography.labelSmall)
+                                Text("${health.latencyMs}ms")
+                            }
+                        }
+                        health.lastError?.let { error ->
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                "Error: $error",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 }
-                health.lastError?.let { error ->
-                    Text(
-                        "  Error: $error",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Debug Log
+            Text(
+                "Debug Log",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(8.dp)
+                ) {
+                    debugLog.takeLast(20).forEach { entry ->
+                        val color = when (entry.type) {
+                            ResearchEngine.LogType.SUCCESS -> MaterialTheme.colorScheme.primary
+                            ResearchEngine.LogType.WARN -> MaterialTheme.colorScheme.tertiary
+                            ResearchEngine.LogType.ERROR -> MaterialTheme.colorScheme.error
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                        val prefix = when (entry.type) {
+                            ResearchEngine.LogType.SUCCESS -> "✅"
+                            ResearchEngine.LogType.WARN -> "⚠️"
+                            ResearchEngine.LogType.ERROR -> "❌"
+                            else -> "ℹ️"
+                        }
+                        Text(
+                            "$prefix ${entry.message}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = color,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
             

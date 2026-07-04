@@ -67,6 +67,8 @@ class ProviderManager {
     
     fun getProviders(): Map<String, ProviderConfig> = providers.toMap()
     
+    fun getProviderName(key: String): String = providers[key]?.name ?: key
+    
     fun isProviderHealthy(key: String): Boolean {
         val provider = providers[key] ?: return false
         if (!provider.enabled) return false
