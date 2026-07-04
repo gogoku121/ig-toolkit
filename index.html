@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI Instagram Business Toolkit - Generate captions, hashtags, reels ideas, product descriptions, story posts, and reply suggestions">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>AI Instagram Business Toolkit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <div class="app" id="app">
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+      <header class="sidebar-header">
+        <div class="logo" role="banner">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="logo-text">IG Toolkit</span>
+        </div>
+      </header>
+      
+      <ul class="nav-tools" role="list">
+        <li>
+          <button class="nav-btn active" data-tool="captions" aria-current="page" aria-label="Caption Generator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
+            </svg>
+            <span>Captions</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tool="hashtags" aria-label="Hashtag Generator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <line x1="4" y1="9" x2="20" y2="9"/>
+              <line x1="4" y1="15" x2="20" y2="15"/>
+              <line x1="10" y1="3" x2="8" y2="21"/>
+              <line x1="16" y1="3" x2="14" y2="21"/>
+            </svg>
+            <span>Hashtags</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tool="reels" aria-label="Reels Ideas Generator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polygon points="23 7 16 12 23 17 23 7"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+            </svg>
+            <span>Reels</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tool="products" aria-label="Product Description Generator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            <span>Products</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tool="stories" aria-label="Story Posts Generator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+            <span>Stories</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-btn" data-tool="replies" aria-label="Reply Suggestions Generator">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+            </svg>
+            <span>Replies</span>
+          </button>
+        </li>
+      </ul>
+
+      <footer class="sidebar-footer">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light theme" title="Toggle theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </footer>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content" role="main" tabindex="-1">
+      <header class="content-header">
+        <div class="header-left">
+          <h1 class="tool-title" id="toolTitle">Caption Generator</h1>
+          <p class="tool-description" id="toolDescription">Create engaging captions that capture attention and drive engagement</p>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <!-- Captions Panel -->
+        <section class="tool-panel active" id="panel-captions" aria-labelledby="captions-heading">
+          <h2 class="sr-only" id="captions-heading">Caption Generator Form</h2>
+          <div class="input-section">
+            <div class="form-group">
+              <label for="captionTopic">Niche / Topic</label>
+              <input type="text" id="captionTopic" class="form-input" placeholder="e.g., Fitness coaching, Travel photography, Vegan recipes" autocomplete="off">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="captionTone">Tone</label>
+                <select id="captionTone" class="form-select">
+                  <option value="professional">Professional</option>
+                  <option value="casual" selected>Casual</option>
+                  <option value="funny">Funny</option>
+                  <option value="inspirational">Inspirational</option>
+                  <option value="promotional">Promotional</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="captionLength">Length</label>
+                <select id="captionLength" class="form-select">
+                  <option value="short">Short</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="long">Long</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn-generate" aria-describedby="caption-desc">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              Generate Captions
+            </button>
+            <span id="caption-desc" class="sr-only">Press Enter or click to generate captions</span>
+          </div>
+          <div class="output-section" aria-live="polite" aria-label="Generated captions">
+            <div class="output-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M4 7V4h16v3M9 20h6M12 4v16"/>
+              </svg>
+              <p>Your generated captions will appear here</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Hashtags Panel -->
+        <section class="tool-panel" id="panel-hashtags" aria-labelledby="hashtags-heading" hidden>
+          <h2 class="sr-only" id="hashtags-heading">Hashtag Generator Form</h2>
+          <div class="input-section">
+            <div class="form-group">
+              <label for="hashtagTopic">Post Topic / Keywords</label>
+              <input type="text" id="hashtagTopic" class="form-input" placeholder="e.g., coffee, morning routine, productivity (comma-separated)" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="hashtagCount">Number of Hashtags: <span class="slider-value" id="hashtagCountValue">15</span></label>
+              <input type="range" id="hashtagCount" class="form-slider" min="5" max="30" value="15" aria-valuemin="5" aria-valuemax="30" aria-valuenow="15">
+            </div>
+            <button type="button" class="btn-generate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              Generate Hashtags
+            </button>
+          </div>
+          <div class="output-section" aria-live="polite" aria-label="Generated hashtags">
+            <div class="output-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <line x1="4" y1="9" x2="20" y2="9"/>
+                <line x1="4" y1="15" x2="20" y2="15"/>
+                <line x1="10" y1="3" x2="8" y2="21"/>
+                <line x1="16" y1="3" x2="14" y2="21"/>
+              </svg>
+              <p>Your hashtags will appear here</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reels Panel -->
+        <section class="tool-panel" id="panel-reels" aria-labelledby="reels-heading" hidden>
+          <h2 class="sr-only" id="reels-heading">Reels Ideas Generator Form</h2>
+          <div class="input-section">
+            <div class="form-group">
+              <label for="reelsCategory">Content Category</label>
+              <select id="reelsCategory" class="form-select">
+                <option value="educational">Educational / Tutorial</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="behind-scenes">Behind the Scenes</option>
+                <option value="lifestyle">Lifestyle</option>
+                <option value="productivity">Productivity</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reelsAudience">Target Audience</label>
+              <input type="text" id="reelsAudience" class="form-input" placeholder="e.g., Young entrepreneurs, Busy moms" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <span class="form-label" id="style-label">Content Style</span>
+              <div class="toggle-group" role="radiogroup" aria-labelledby="style-label">
+                <button type="button" class="toggle-btn active" data-style="trendy" role="radio" aria-checked="true">Trendy</button>
+                <button type="button" class="toggle-btn" data-style="evergreen" role="radio" aria-checked="false">Evergreen</button>
+              </div>
+            </div>
+            <button type="button" class="btn-generate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              Generate Reels Ideas
+            </button>
+          </div>
+          <div class="output-section" aria-live="polite" aria-label="Generated reels ideas">
+            <div class="output-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+              </svg>
+              <p>Your reels ideas will appear here</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Products Panel -->
+        <section class="tool-panel" id="panel-products" aria-labelledby="products-heading" hidden>
+          <h2 class="sr-only" id="products-heading">Product Description Generator Form</h2>
+          <div class="input-section">
+            <div class="form-group">
+              <label for="productName">Product Name</label>
+              <input type="text" id="productName" class="form-input" placeholder="e.g., Organic Coffee Beans, Smart Watch Pro" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="productFeatures">Key Features</label>
+              <textarea id="productFeatures" class="form-textarea" placeholder="e.g., 100% Arabica, Fair trade certified, Rich aroma" rows="3"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="productPrice">Price Range (Optional)</label>
+                <input type="text" id="productPrice" class="form-input" placeholder="e.g., $19.99 - $29.99" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label for="productAudience">Target Audience</label>
+                <input type="text" id="productAudience" class="form-input" placeholder="e.g., Coffee enthusiasts" autocomplete="off">
+              </div>
+            </div>
+            <button type="button" class="btn-generate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              Generate Descriptions
+            </button>
+          </div>
+          <div class="output-section" aria-live="polite" aria-label="Generated product descriptions">
+            <div class="output-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+              </svg>
+              <p>Your product descriptions will appear here</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stories Panel -->
+        <section class="tool-panel" id="panel-stories" aria-labelledby="stories-heading" hidden>
+          <h2 class="sr-only" id="stories-heading">Story Posts Generator Form</h2>
+          <div class="input-section">
+            <div class="form-group">
+              <label for="storyType">Story Type</label>
+              <select id="storyType" class="form-select">
+                <option value="announcement">Announcement</option>
+                <option value="poll">Poll / Quiz</option>
+                <option value="question">Question / Q&A</option>
+                <option value="behind-scenes">Behind the Scenes</option>
+                <option value="ugc">User Generated Content</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="storyTopic">Topic / Theme</label>
+              <input type="text" id="storyTopic" class="form-input" placeholder="e.g., New product launch, Daily routine" autocomplete="off">
+            </div>
+            <button type="button" class="btn-generate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              Generate Story Ideas
+            </button>
+          </div>
+          <div class="output-section" aria-live="polite" aria-label="Generated story ideas">
+            <div class="output-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+              <p>Your story ideas will appear here</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Replies Panel -->
+        <section class="tool-panel" id="panel-replies" aria-labelledby="replies-heading" hidden>
+          <h2 class="sr-only" id="replies-heading">Reply Suggestions Generator Form</h2>
+          <div class="input-section">
+            <div class="form-group">
+              <label for="replyType">Comment Type</label>
+              <select id="replyType" class="form-select">
+                <option value="positive">Positive / Compliment</option>
+                <option value="question">Question / Inquiry</option>
+                <option value="negative">Negative / Complaint</option>
+                <option value="sarcastic">Playful / Sarcastic</option>
+                <option value="follower">Follower Appreciation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="replyContext">Post / Context Topic</label>
+              <input type="text" id="replyContext" class="form-input" placeholder="e.g., New skincare product launch, Travel vlog" autocomplete="off">
+            </div>
+            <button type="button" class="btn-generate">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+              Generate Reply Suggestions
+            </button>
+          </div>
+          <div class="output-section" aria-live="polite" aria-label="Generated reply suggestions">
+            <div class="output-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+              </svg>
+              <p>Your reply suggestions will appear here</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- App Script -->
+  <script type="module" src="./src/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "ig-toolkit",
+  "version": "2.0.0",
+  "description": "AI Instagram Business Toolkit - Generate captions, hashtags, reels ideas, product descriptions, story posts, and reply suggestions",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "http-server -p 8080 -c-1",
+    "dev": "http-server -p 8080 -c-1 --cors"
+  },
+  "keywords": ["instagram", "social-media", "content-generator", "toolkit"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
