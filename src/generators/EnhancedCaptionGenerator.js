@@ -1,23 +1,22 @@
-// Enhanced Caption Generator using StrategistContentGenerator
-import { StrategistContentGenerator } from '../core/intelligence/StrategistContentGenerator.js';
+// Enhanced Caption Generator using ReasoningFirstGenerator
+import { ReasoningFirstGenerator } from '../core/intelligence/ReasoningFirstGenerator.js';
 import { PERSONALITY_PRESETS, GOALS, AUDIENCES } from '../core/enhanced/Presets.js';
 
-let strategistInstance = null;
+let generatorInstance = null;
 
-async function getStrategist() {
-  if (!strategistInstance) {
-    strategistInstance = new StrategistContentGenerator();
-    await strategistInstance.init();
+function getGenerator() {
+  if (!generatorInstance) {
+    generatorInstance = new ReasoningFirstGenerator();
   }
-  return strategistInstance;
+  return generatorInstance;
 }
 
 export class EnhancedCaptionGenerator {
   constructor() {
-    this.strategist = null;
+    this.generator = getGenerator();
   }
 
-  static async generate(options = {}) {
+  static generate(options = {}) {
     const {
       topic,
       tone = 'casual',
@@ -37,42 +36,57 @@ export class EnhancedCaptionGenerator {
       ? EnhancedCaptionGenerator._selectDefaultPersonality(tone) 
       : personality;
 
-    // Use StrategistContentGenerator for memory-aware generation
-    const strategist = await getStrategist();
-    
-    const result = await strategist.generate({
-      topic: topic.trim(),
-      personality: selectedPersonality,
-      goal,
-      audience,
-      strategy: pattern,
-      versions
-    });
+    const generator = getGenerator();
+    const results = [];
 
-    // Format results
-    const results = (result.results || []).map((r, i) => ({
-      id: `caption-${Date.now()}-${i}`,
-      type: 'caption',
-      title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
-      content: r.content,
-      metadata: {
-        tone,
-        length,
-        personality: result.context?.selectedPersonality || selectedPersonality,
+    // Generate multiple versions using reasoning-first approach
+    for (let i = 0; i < versions; i++) {
+      const result = generator.generate({
+        topic: topic.trim(),
+        personality: selectedPersonality,
         goal,
         audience,
-        pattern: r.strategy,
-        score: r.scores?.overall || r.finalScore || 75,
-        grade: EnhancedCaptionGenerator._getGrade(r.scores?.overall || r.finalScore || 75),
-        category: result.expandedTopic,
-        strategy: r.strategy,
-        topicExpansion: r.topicExpansion,
-        rank: r.rank,
-        iteration: r.iteration,
-        passedQualityCheck: r.passedQualityCheck,
-        passedSimilarityCheck: r.passedSimilarityCheck
-      }
-    }));
+        strategy: pattern
+      });
+
+      results.push({
+        id: `caption-${Date.now()}-${i}`,
+        type: 'caption',
+        title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
+        content: result.content,
+        metadata: {
+          tone,
+          length,
+          personality: selectedPersonality,
+          goal,
+          audience,
+          pattern: result.outline?.strategy,
+          score: result.scores?.overall || 75,
+          grade: EnhancedCaptionGenerator._getGrade(result.scores?.overall || 75),
+          strategy: result.outline?.name,
+          observations: result.observations?.length,
+          opinions: result.opinions?.length,
+          iterations: result.iterations,
+          reflection: {
+            hasInsight: result.passedChecks?.insight,
+            hasExample: result.passedChecks?.example,
+            hasOriginal: result.passedChecks?.original,
+            hasTakeaway: result.passedChecks?.takeaway,
+            soundsHuman: result.passedChecks?.human
+          },
+          rank: i === 0 ? 1 : i + 1
+        }
+      });
+    }
+
+    // Sort by score
+    results.sort((a, b) => b.metadata.score - a.metadata.score);
+    
+    // Re-rank
+    results.forEach((result, index) => {
+      result.metadata.rank = index + 1;
+      result.title = `Version ${index + 1}${index === 0 ? ' ⭐ Best' : ''}`;
+    });
 
     return results;
   }
