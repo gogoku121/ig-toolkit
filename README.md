@@ -1,74 +1,78 @@
-# IG Toolkit - AI-Powered Content Intelligence Platform
+# IG Toolkit
 
-A production-ready Android application and web platform for Instagram content creators.
+**Native Android app** for AI-powered Instagram caption generation with real-time research capabilities.
+
+## Features
+
+- 🤖 **AI Caption Generation** - 10 personality types, multiple versions
+- 🔍 **Live Research** - DuckDuckGo & SerpAPI with auto-failover
+- 📊 **Quality Scoring** - 7-factor research quality assessment
+- 🌐 **Smart Fallback** - ONLINE → CACHE → MEMORY → OFFLINE
+- 📱 **Native Android** - Jetpack Compose, Material 3
+- 🐛 **Debug Panel** - Provider health, latency, success rates
+
+## Get Started
+
+### Install APK
+
+Download `ig-toolkit-kotlin-v1.apk` from MinIO and install on your Android device.
+
+### Build from Source
+
+```bash
+cd android-kotlin
+./gradlew assembleDebug
+```
+
+APK: `android-kotlin/app/build/outputs/apk/debug/app-debug.apk`
+
+### Development
+
+```bash
+cd android-kotlin
+./gradlew run
+```
 
 ## Project Structure
 
 ```
-ig-toolkit/
-├── www/                 # Web app (standalone, browser-ready)
-│   ├── index.html
-│   └── src/
-├── android/            # Android native shell
-│   └── app/src/main/assets/web/  # Copied from www/
-├── src/                # Source files
-├── package.json
-└── .github/workflows/  # CI/CD
-```
-
-## Quick Start
-
-### Web Development
-```bash
-npm install
-npm start        # Run web app in browser (localhost:8080)
-npm run dev      # Run with CORS enabled
-```
-
-### Android Development
-```bash
-npm run dev:android   # Build APK
-npm run open:android  # Open in Android Studio
-```
-
-### Build Commands
-```bash
-npm run build:web     # Build web app (copies src/ to www/)
-npm run build:android # Sync web to Android
+├── android-kotlin/     # Native Kotlin Android app (Jetpack Compose)
+├── android/           # Capacitor WebView app (legacy)
+├── src/               # Web app source files (legacy)
+└── docs/              # Documentation
 ```
 
 ## Architecture
 
 ```
-┌─────────────────────┐     ┌─────────────────────┐
-│   Web Browser       │     │   Android App       │
-│   localhost:8080    │     │   (WebView)        │
-└──────────┬──────────┘     └──────────┬──────────┘
-           │                           │
-           ▼                           ▼
-      ┌────────────────────────────────┐
-      │           www/ (web app)        │
-      │  - Research Engine              │
-      │  - Intelligence Engine         │
-      │  - UI Components               │
-      └────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│              UI Layer                    │
+│  (Jetpack Compose - MainScreen)         │
+└─────────────────────────────────────────┘
+                    │
+┌─────────────────────────────────────────┐
+│           Domain Layer                   │
+│  ResearchEngine │ CaptionGenerator       │
+│  QualityScorer │ ProviderManager       │
+└─────────────────────────────────────────┘
+                    │
+┌─────────────────────────────────────────┐
+│           Data Layer                     │
+│  OkHttp (Network) │ DataStore (Local)   │
+└─────────────────────────────────────────┘
 ```
 
-## Development Workflow
+## App Modes
 
-1. **Develop in browser** - `npm start` → `localhost:8080`
-2. **Test changes** - Edit `src/` files → Refresh browser
-3. **Build web** - `npm run build:web` (copies to www/)
-4. **Build APK** - `npm run dev:android`
+| Mode | Indicator | Description |
+|------|-----------|-------------|
+| ONLINE | 🟢 Green | Live research from search APIs |
+| CACHE | 🟠 Orange | Using cached research data |
+| MEMORY | 🔵 Blue | Using stored knowledge |
+| OFFLINE | 🔴 Red | Local intelligence only |
 
-## GitHub Actions
+## Documentation
 
-CI/CD runs on every push:
-1. Build web app (`npm run build:web`)
-2. Copy to Android assets
-3. Build Debug APK
-4. Upload artifacts
-
-## License
-
-MIT
+- [docs/SPEC.md](./docs/SPEC.md) - Technical specification
+- [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Architecture details
+- [CHANGELOG.md](./CHANGELOG.md) - Version history
