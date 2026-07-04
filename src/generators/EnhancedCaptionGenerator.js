@@ -1,12 +1,12 @@
-// Enhanced Caption Generator using InsightFirstGenerator
-import { InsightFirstGenerator } from '../core/intelligence/InsightFirstGenerator.js';
+// Enhanced Caption Generator using SupremeGenerator
+import { SupremeGenerator } from '../core/intelligence/SupremeGenerator.js';
 import { PERSONALITY_PRESETS, GOALS, AUDIENCES } from '../core/enhanced/Presets.js';
 
 let generatorInstance = null;
 
 function getGenerator() {
   if (!generatorInstance) {
-    generatorInstance = new InsightFirstGenerator();
+    generatorInstance = new SupremeGenerator();
   }
   return generatorInstance;
 }
@@ -39,12 +39,11 @@ export class EnhancedCaptionGenerator {
     const generator = getGenerator();
     const results = [];
 
-    // Generate multiple versions using insight-first approach
+    // Generate multiple versions using supreme approach
     for (let i = 0; i < versions; i++) {
       const result = generator.generate({
         topic: topic.trim(),
         personality: selectedPersonality,
-        style: pattern === 'auto' ? 'auto' : pattern,
         goal,
         audience
       });
@@ -60,23 +59,21 @@ export class EnhancedCaptionGenerator {
           personality: selectedPersonality,
           goal,
           audience,
-          pattern: result.pipeline?.style,
-          score: result.qualityScore || 75,
-          grade: EnhancedCaptionGenerator._getGrade(result.qualityScore || 75),
-          strategy: result.pipeline?.style,
-          creatorStyle: result.pipeline?.style,
-          hooksUsed: result.pipeline?.hook?.type,
-          insightsGenerated: result.pipeline?.insights?.length,
-          questionsGenerated: result.pipeline?.questions?.length,
-          evidenceGenerated: result.pipeline?.evidence?.length,
-          analogiesGenerated: result.pipeline?.analogies?.length,
-          iterations: result.pipeline?.iterations,
+          pattern: result.ideaMix?.primary,
+          score: result.scores?.overall || result.grade === 'A+' ? 95 : result.grade === 'A' ? 90 : 75,
+          grade: result.grade || EnhancedCaptionGenerator._getGrade(result.scores?.overall || 75),
+          originality: result.scores?.originality,
+          draftsGenerated: result.pipeline?.draftsGenerated,
+          originalityChecks: result.pipeline?.originalityChecks,
+          editsApplied: result.pipeline?.editsApplied,
           checks: {
             hasInsight: result.checks?.hasInsight,
             hasExample: result.checks?.hasExample,
             hasTakeaway: result.checks?.hasTakeaway,
             hasEmotional: result.checks?.hasEmotional,
-            isOriginal: result.checks?.isOriginal
+            isOriginal: result.checks?.isOriginal,
+            wouldSave: result.checks?.wouldSave,
+            hasStopScroll: result.checks?.hasStopScroll
           },
           rank: i === 0 ? 1 : i + 1
         }

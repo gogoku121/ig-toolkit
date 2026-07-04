@@ -32,3 +32,8 @@ export { EvidenceEngine } from './EvidenceEngine.js';
 export { CuriosityEngine } from './CuriosityEngine.js';
 export { CreatorStyleEngine } from './CreatorStyleEngine.js';
 export { InsightFirstGenerator } from './InsightFirstGenerator.js';
+export { OriginalityEngine } from './OriginalityEngine.js';
+export { DraftEngine } from './DraftEngine.js';
+export { EditEngine } from './EditEngine.js';
+export { IdeaMixer } from './IdeaMixer.js';
+export { SupremeGenerator } from './SupremeGenerator.js';
