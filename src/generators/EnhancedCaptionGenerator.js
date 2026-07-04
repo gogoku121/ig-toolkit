@@ -1,14 +1,23 @@
-// Enhanced Caption Generator using SmartContentGenerator
-import { SmartContentGenerator } from '../core/intelligence/SmartContentGenerator.js';
+// Enhanced Caption Generator using StrategistContentGenerator
+import { StrategistContentGenerator } from '../core/intelligence/StrategistContentGenerator.js';
 import { PERSONALITY_PRESETS, GOALS, AUDIENCES } from '../core/enhanced/Presets.js';
-import { shuffle } from '../core/contentData.js';
+
+let strategistInstance = null;
+
+async function getStrategist() {
+  if (!strategistInstance) {
+    strategistInstance = new StrategistContentGenerator();
+    await strategistInstance.init();
+  }
+  return strategistInstance;
+}
 
 export class EnhancedCaptionGenerator {
   constructor() {
-    this.generator = new SmartContentGenerator();
+    this.strategist = null;
   }
 
-  static generate(options = {}) {
+  static async generate(options = {}) {
     const {
       topic,
       tone = 'casual',
@@ -28,48 +37,42 @@ export class EnhancedCaptionGenerator {
       ? EnhancedCaptionGenerator._selectDefaultPersonality(tone) 
       : personality;
 
-    const results = [];
+    // Use StrategistContentGenerator for memory-aware generation
+    const strategist = await getStrategist();
+    
+    const result = await strategist.generate({
+      topic: topic.trim(),
+      personality: selectedPersonality,
+      goal,
+      audience,
+      strategy: pattern,
+      versions
+    });
 
-    // Generate multiple versions using SmartContentGenerator
-    for (let i = 0; i < versions; i++) {
-      const result = new EnhancedCaptionGenerator().generator.generate({
-        topic: topic.trim(),
-        personality: selectedPersonality,
+    // Format results
+    const results = (result.results || []).map((r, i) => ({
+      id: `caption-${Date.now()}-${i}`,
+      type: 'caption',
+      title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
+      content: r.content,
+      metadata: {
+        tone,
+        length,
+        personality: result.context?.selectedPersonality || selectedPersonality,
         goal,
         audience,
-        strategy: pattern
-      });
-
-      results.push({
-        id: `caption-${Date.now()}-${i}`,
-        type: 'caption',
-        title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
-        content: result.content,
-        metadata: {
-          tone,
-          length,
-          personality: selectedPersonality,
-          goal,
-          audience,
-          pattern: result.strategy,
-          score: result.critique?.scores?.overall || 75,
-          grade: EnhancedCaptionGenerator._getGrade(result.critique?.scores?.overall || 75),
-          category: result.packName,
-          strategy: result.strategy,
-          sections: Object.keys(result.sections || {}),
-          rank: i === 0 ? 1 : i + 1
-        }
-      });
-    }
-
-    // Sort by score
-    results.sort((a, b) => b.metadata.score - a.metadata.score);
-    
-    // Re-rank and update titles
-    results.forEach((result, index) => {
-      result.metadata.rank = index + 1;
-      result.title = `Version ${index + 1}${index === 0 ? ' ⭐ Best' : ''}`;
-    });
+        pattern: r.strategy,
+        score: r.scores?.overall || r.finalScore || 75,
+        grade: EnhancedCaptionGenerator._getGrade(r.scores?.overall || r.finalScore || 75),
+        category: result.expandedTopic,
+        strategy: r.strategy,
+        topicExpansion: r.topicExpansion,
+        rank: r.rank,
+        iteration: r.iteration,
+        passedQualityCheck: r.passedQualityCheck,
+        passedSimilarityCheck: r.passedSimilarityCheck
+      }
+    }));
 
     return results;
   }
