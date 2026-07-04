@@ -1,12 +1,12 @@
-// Enhanced Caption Generator using ReasoningFirstGenerator
-import { ReasoningFirstGenerator } from '../core/intelligence/ReasoningFirstGenerator.js';
+// Enhanced Caption Generator using InsightFirstGenerator
+import { InsightFirstGenerator } from '../core/intelligence/InsightFirstGenerator.js';
 import { PERSONALITY_PRESETS, GOALS, AUDIENCES } from '../core/enhanced/Presets.js';
 
 let generatorInstance = null;
 
 function getGenerator() {
   if (!generatorInstance) {
-    generatorInstance = new ReasoningFirstGenerator();
+    generatorInstance = new InsightFirstGenerator();
   }
   return generatorInstance;
 }
@@ -39,14 +39,14 @@ export class EnhancedCaptionGenerator {
     const generator = getGenerator();
     const results = [];
 
-    // Generate multiple versions using reasoning-first approach
+    // Generate multiple versions using insight-first approach
     for (let i = 0; i < versions; i++) {
       const result = generator.generate({
         topic: topic.trim(),
         personality: selectedPersonality,
+        style: pattern === 'auto' ? 'auto' : pattern,
         goal,
-        audience,
-        strategy: pattern
+        audience
       });
 
       results.push({
@@ -60,19 +60,23 @@ export class EnhancedCaptionGenerator {
           personality: selectedPersonality,
           goal,
           audience,
-          pattern: result.outline?.strategy,
-          score: result.scores?.overall || 75,
-          grade: EnhancedCaptionGenerator._getGrade(result.scores?.overall || 75),
-          strategy: result.outline?.name,
-          observations: result.observations?.length,
-          opinions: result.opinions?.length,
-          iterations: result.iterations,
-          reflection: {
-            hasInsight: result.passedChecks?.insight,
-            hasExample: result.passedChecks?.example,
-            hasOriginal: result.passedChecks?.original,
-            hasTakeaway: result.passedChecks?.takeaway,
-            soundsHuman: result.passedChecks?.human
+          pattern: result.pipeline?.style,
+          score: result.qualityScore || 75,
+          grade: EnhancedCaptionGenerator._getGrade(result.qualityScore || 75),
+          strategy: result.pipeline?.style,
+          creatorStyle: result.pipeline?.style,
+          hooksUsed: result.pipeline?.hook?.type,
+          insightsGenerated: result.pipeline?.insights?.length,
+          questionsGenerated: result.pipeline?.questions?.length,
+          evidenceGenerated: result.pipeline?.evidence?.length,
+          analogiesGenerated: result.pipeline?.analogies?.length,
+          iterations: result.pipeline?.iterations,
+          checks: {
+            hasInsight: result.checks?.hasInsight,
+            hasExample: result.checks?.hasExample,
+            hasTakeaway: result.checks?.hasTakeaway,
+            hasEmotional: result.checks?.hasEmotional,
+            isOriginal: result.checks?.isOriginal
           },
           rank: i === 0 ? 1 : i + 1
         }
