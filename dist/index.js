@@ -12,7 +12,6 @@ import { Input, Select, Slider, Textarea, ToggleGroup } from './components/FormE
 import { ContentCard, LoadingCard, ErrorCard } from './components/ContentCard.js';
 import {
   CaptionGenerator,
-  EnhancedCaptionGenerator,
   HashtagGenerator,
   ReelsGenerator,
   ProductGenerator,
@@ -25,7 +24,7 @@ class App {
     this.elements = {};
     this.toolComponents = {};
     this.generators = {
-      captions: EnhancedCaptionGenerator,
+      captions: CaptionGenerator,
       hashtags: HashtagGenerator,
       reels: ReelsGenerator,
       products: ProductGenerator,
@@ -245,11 +244,7 @@ class App {
         return {
           topic: getValue('#captionTopic'),
           tone: getValue('#captionTone'),
-          length: getValue('#captionLength'),
-          personality: getValue('#captionPersonality') || 'default',
-          goal: getValue('#captionGoal') || 'engage',
-          audience: getValue('#captionAudience') || 'general',
-          pattern: getValue('#captionPattern') || 'auto'
+          length: getValue('#captionLength')
         };
       case 'hashtags':
         return {
