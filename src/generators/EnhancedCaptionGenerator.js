@@ -1,22 +1,22 @@
-// Enhanced Caption Generator using SupremeGenerator
-import { SupremeGenerator } from '../core/intelligence/SupremeGenerator.js';
+// Enhanced Caption Generator with Research Engine
+import { ResearchEngine } from '../core/research/ResearchEngine.js';
 import { PERSONALITY_PRESETS, GOALS, AUDIENCES } from '../core/enhanced/Presets.js';
 
-let generatorInstance = null;
+let researchEngine = null;
 
-function getGenerator() {
-  if (!generatorInstance) {
-    generatorInstance = new SupremeGenerator();
+function getEngine() {
+  if (!researchEngine) {
+    researchEngine = new ResearchEngine();
   }
-  return generatorInstance;
+  return researchEngine;
 }
 
 export class EnhancedCaptionGenerator {
   constructor() {
-    this.generator = getGenerator();
+    this.engine = getEngine();
   }
 
-  static generate(options = {}) {
+  static async generate(options = {}) {
     const {
       topic,
       tone = 'casual',
@@ -36,60 +36,54 @@ export class EnhancedCaptionGenerator {
       ? EnhancedCaptionGenerator._selectDefaultPersonality(tone) 
       : personality;
 
-    const generator = getGenerator();
-    const results = [];
-
-    // Generate multiple versions using supreme approach
-    for (let i = 0; i < versions; i++) {
-      const result = generator.generate({
-        topic: topic.trim(),
-        personality: selectedPersonality,
-        goal,
-        audience
-      });
-
-      results.push({
-        id: `caption-${Date.now()}-${i}`,
-        type: 'caption',
-        title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
-        content: result.content,
-        metadata: {
-          tone,
-          length,
-          personality: selectedPersonality,
-          goal,
-          audience,
-          pattern: result.ideaMix?.primary,
-          score: result.scores?.overall || result.grade === 'A+' ? 95 : result.grade === 'A' ? 90 : 75,
-          grade: result.grade || EnhancedCaptionGenerator._getGrade(result.scores?.overall || 75),
-          originality: result.scores?.originality,
-          draftsGenerated: result.pipeline?.draftsGenerated,
-          originalityChecks: result.pipeline?.originalityChecks,
-          editsApplied: result.pipeline?.editsApplied,
-          checks: {
-            hasInsight: result.checks?.hasInsight,
-            hasExample: result.checks?.hasExample,
-            hasTakeaway: result.checks?.hasTakeaway,
-            hasEmotional: result.checks?.hasEmotional,
-            isOriginal: result.checks?.isOriginal,
-            wouldSave: result.checks?.wouldSave,
-            hasStopScroll: result.checks?.hasStopScroll
-          },
-          rank: i === 0 ? 1 : i + 1
-        }
-      });
-    }
-
-    // Sort by score
-    results.sort((a, b) => b.metadata.score - a.metadata.score);
-    
-    // Re-rank
-    results.forEach((result, index) => {
-      result.metadata.rank = index + 1;
-      result.title = `Version ${index + 1}${index === 0 ? ' ⭐ Best' : ''}`;
+    const engine = getEngine();
+    const { results, mode } = await engine.researchAndGenerate({
+      topic: topic.trim(),
+      personality: selectedPersonality,
+      goal,
+      audience,
+      versions
     });
 
-    return results;
+    // Format results
+    const formatted = results.map((result, i) => ({
+      id: `caption-${Date.now()}-${i}`,
+      type: 'caption',
+      title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
+      content: result.content,
+      metadata: {
+        tone,
+        length,
+        personality: selectedPersonality,
+        goal,
+        audience,
+        pattern: result.ideaMix?.primary,
+        score: result.scores?.overall || 75,
+        grade: result.grade || EnhancedCaptionGenerator._getGrade(result.scores?.overall || 75),
+        mode,
+        researchStatus: engine.getStatus(),
+        checks: {
+          hasInsight: result.checks?.hasInsight,
+          hasExample: result.checks?.hasExample,
+          hasTakeaway: result.checks?.hasTakeaway,
+          hasEmotional: result.checks?.hasEmotional,
+          isOriginal: result.checks?.isOriginal
+        },
+        rank: i + 1
+      }
+    }));
+
+    return formatted;
+  }
+
+  static getStatus() {
+    const engine = getEngine();
+    return engine.getStatus();
+  }
+
+  static async clearResearchCache() {
+    const engine = getEngine();
+    await engine.clearCache();
   }
 
   static _getGrade(score) {
