@@ -12,6 +12,8 @@ import { EntityIntelligenceEngine } from './EntityIntelligenceEngine.js';
 import { KnowledgeLayer } from './KnowledgeLayer.js';
 import { ReasoningEngine } from './ReasoningEngine.js';
 import { HumanWritingEngine } from './HumanWritingEngine.js';
+import { MemoryManager } from './MemoryManager.js';
+import { CritiqueEngine } from './CritiqueEngine.js';
 import { shuffle, random, capitalizeFirst } from '../contentData.js';
 
 /**
@@ -24,6 +26,8 @@ export class IntelligencePipeline {
     this.knowledgeLayer = new KnowledgeLayer();
     this.reasoningEngine = new ReasoningEngine();
     this.humanWritingEngine = new HumanWritingEngine();
+    this.memoryManager = new MemoryManager();
+    this.critiqueEngine = new CritiqueEngine();
     
     this.generationHistory = [];
     this.maxHistory = 100;
@@ -95,10 +99,32 @@ export class IntelligencePipeline {
         topic
       });
 
-      // Stage 8: Self-Critique & Score
+      // Stage 8: Self-Critique & Rewrite (up to 3 iterations)
+      const critiqueResult = this.critiqueEngine.critique(version.humanizedContent, {
+        goal,
+        personality
+      });
+      
+      // Use the best version after critique
+      version.humanizedContent = critiqueResult.content;
+      version.critique = {
+        iterations: critiqueResult.iterations,
+        issues: critiqueResult.issues,
+        grade: critiqueResult.grade
+      };
+
+      // Stage 9: Final Scoring
       const scores = this._scoreContent(version.humanizedContent, goal);
       version.scores = scores;
       version.finalScore = scores.total;
+
+      // Stage 10: Track in Memory for uniqueness
+      this.memoryManager.analyzeAndTrack(version.humanizedContent, {
+        topic,
+        personality,
+        goal,
+        pattern: version.strategy
+      });
 
       versions_output.push(version);
     }
@@ -112,7 +138,7 @@ export class IntelligencePipeline {
       v.isBest = i === 0;
     });
 
-    // Track generation
+    // Track generation in history
     this._trackGeneration({
       topic,
       personality,

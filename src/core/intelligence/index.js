@@ -7,4 +7,6 @@ export { EntityIntelligenceEngine, ENTITY_DATABASE } from './EntityIntelligenceE
 export { KnowledgeLayer, KNOWLEDGE_BASE } from './KnowledgeLayer.js';
 export { ReasoningEngine } from './ReasoningEngine.js';
 export { HumanWritingEngine } from './HumanWritingEngine.js';
+export { MemoryManager } from './MemoryManager.js';
+export { CritiqueEngine } from './CritiqueEngine.js';
 export { IntelligencePipeline } from './IntelligencePipeline.js';
