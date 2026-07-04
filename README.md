@@ -1,58 +1,63 @@
 # AI Instagram Business Toolkit
 
-Generate Instagram content including captions, hashtags, reels ideas, product descriptions, story posts, and reply suggestions.
+An intelligent content generation platform for Instagram creators, marketers, and businesses. Generate context-aware captions, hashtags, reels ideas, and more using AI-powered content engines.
 
 ## Features
 
-- **Caption Generator** - Professional, casual, funny, inspirational, promotional tones
-- **Hashtag Generator** - Popular, niche, and keyword-based hashtags
-- **Reels Ideas Generator** - Hooks, scripts, duration, and trending audio suggestions
-- **Product Description Generator** - Compelling product copy with multiple variations
-- **Story Posts Generator** - Engaging story concepts with slide-by-slide breakdowns
-- **Reply Suggestions Generator** - Smart reply templates for different comment types
+- **Caption Generator** - Context-aware, multi-version captions with personality and goal targeting
+- **Hashtag Generator** - Topic-based hashtag collections
+- **Reels Ideas Generator** - Hooks, scripts, and trending suggestions
+- **Product Description Generator** - Compelling product copy
+- **Story Posts Generator** - Engaging story concepts
+- **Reply Suggestions Generator** - Smart reply templates
 
-## Architecture
+## Intelligence Engine
 
-Built with a modular ES6+ architecture:
+The toolkit includes a sophisticated **Intelligence Engine** that produces human-like, context-aware content:
+
+### Architecture
 
 ```
-src/
-├── core/           # Core utilities
-│   ├── config.js    # Application configuration
-│   ├── state.js     # Reactive state management
-│   ├── storage.js   # localStorage abstraction
-│   ├── eventBus.js  # Event communication
-│   ├── dom.js       # DOM utilities
-│   └── contentData.js # Content phrase banks
-├── components/      # Reusable UI components
-│   ├── Button.js
-│   ├── Toast.js
-│   ├── Modal.js
-│   ├── FormElements.js
-│   └── ContentCard.js
-├── generators/     # Content generators
-│   ├── CaptionGenerator.js
-│   ├── HashtagGenerator.js
-│   ├── ReelsGenerator.js
-│   ├── ProductGenerator.js
-│   ├── StoryGenerator.js
-│   └── ReplyGenerator.js
-├── styles/
-│   └── main.css    # CSS with custom properties
-└── index.js        # Main entry point
+src/core/intelligence/
+├── EntityIntelligenceEngine.js  # Brand/product detection (Tesla, OpenAI, etc.)
+├── KnowledgeLayer.js           # Structured knowledge for 10 categories
+├── ReasoningEngine.js         # Strategic pre-generation reasoning
+├── HumanWritingEngine.js      # Natural writing patterns
+├── MemoryManager.js           # Uniqueness tracking
+├── CritiqueEngine.js          # Self-critique with rewrites
+└── IntelligencePipeline.js     # 10-stage orchestration
 ```
 
-## Key Features
+### 10-Stage Pipeline
 
-- **ES Modules** - Clean module imports, no bundler required
-- **Reactive State** - Proxy-based state management
-- **Component Architecture** - Reusable Button, Toast, Modal, Card components
-- **Accessibility** - ARIA labels, keyboard navigation, focus management
-- **Safe DOM** - No innerHTML, escapeHtml for XSS prevention
-- **Loading States** - Skeleton loaders and error handling
-- **Export/History** - localStorage-based history and favorites
-- **Theme Toggle** - Dark/light mode with persistence
-- **Keyboard Shortcuts** - Quick navigation (1-6 for tools, G to generate)
+1. **Entity Detection** - Identifies brands/products (Tesla, OpenAI, ChatGPT, etc.)
+2. **Topic Classification** - 20+ categories with auto-detection
+3. **Internal Reasoning** - Strategic questions answered before generation
+4. **Knowledge Expansion** - Facts, insights, tips from knowledge layer
+5. **Strategy Selection** - Educational, Storytelling, Problem-Solution, etc.
+6. **Content Generation** - Entity-aware, knowledge-grounded output
+7. **Humanization** - Varies sentence structure, removes robotic patterns
+8. **Self-Critique** - Evaluates 6 criteria, rewrites weak sections (up to 3 iterations)
+9. **Quality Scoring** - Hook, readability, engagement, uniqueness, goal alignment, CTA
+10. **Memory Tracking** - Ensures uniqueness across generations
+
+### 13 Personality Presets
+
+Viral Creator, Luxury Brand, Startup Founder, Gen Z, Minimalist, Funny, Storyteller, Educational, Corporate, Premium Brand, Influencer, Emotional, Luxury Lifestyle
+
+### 8 Goals
+
+Educate, Entertain, Inspire, Sell, Build Trust, Generate Comments, Generate Shares, Generate Saves
+
+### Scoring System
+
+Each generated content is scored A+ to F across:
+- Hook Strength (15%)
+- Readability (20%)
+- Engagement (20%)
+- Uniqueness (15%)
+- Goal Alignment (15%)
+- CTA Quality (10%)
 
 ## Usage
 
@@ -61,7 +66,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:8080
+Open http://localhost:8080
 
 ## Keyboard Shortcuts
 
@@ -71,26 +76,38 @@ Then open http://localhost:8080
 | G | Generate |
 | T | Toggle theme |
 
-## Future AI Integration
-
-The architecture is prepared for AI API integration. Each generator returns a standard format:
-
-```javascript
-{
-  id: string,
-  type: string,
-  title: string,
-  content: string,
-  metadata: object
-}
-```
-
 ## Tech Stack
 
 - Vanilla HTML5/CSS3/JavaScript ES6+
+- Capacitor for Android APK
 - CSS Custom Properties for theming
 - localStorage for persistence
 - No external dependencies (production)
+
+## API Readiness
+
+The Intelligence Pipeline returns structured output ready for LLM API integration:
+
+```javascript
+{
+  topic,
+  personality,
+  goal,
+  category,
+  primaryEntity,
+  versions: [
+    {
+      content: "Humanized caption text...",
+      scores: { hook, readability, engagement, uniqueness, goalAlignment, cta, total },
+      grade: "A",
+      rank: 1,
+      strategy: "storytelling"
+    }
+  ],
+  bestVersion,
+  reasoning: { whyCare, problemSolved, misconception, surprisingElement, ... }
+}
+```
 
 ## License
 
