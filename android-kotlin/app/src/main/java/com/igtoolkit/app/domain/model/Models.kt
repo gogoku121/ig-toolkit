@@ -3,7 +3,7 @@ package com.igtoolkit.app.domain.model
 /**
  * Research data extracted from search providers
  */
-data class ResearchData(
+data class ResearchResult(
     val topic: String = "",
     val provider: String = "offline",
     val source: String = "local_knowledge",
@@ -145,6 +145,7 @@ enum class Personality(val displayName: String, val description: String) {
  * Content goals
  */
 enum class Goal(val displayName: String) {
+    ENGAGE("Engage"),
     EDUCATE("Educate"),
     ENTERTAIN("Entertain"),
     INSPIRE("Inspire"),

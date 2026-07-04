@@ -266,12 +266,12 @@ fun PersonalitySelector(
 
 @Composable
 fun ResearchQualityIndicator(research: ResearchResult) {
-    val color = when (research.qualityLevel) {
-        QualityLevel.EXCELLENT -> MaterialTheme.colorScheme.primary
-        QualityLevel.GOOD -> MaterialTheme.colorScheme.tertiary
-        QualityLevel.ADEQUATE -> MaterialTheme.colorScheme.secondary
-        QualityLevel.POOR -> MaterialTheme.colorScheme.error
-        QualityLevel.OFFLINE -> MaterialTheme.colorScheme.outline
+    val color = when {
+        research.qualityScore >= 70 -> MaterialTheme.colorScheme.primary
+        research.qualityScore >= 50 -> MaterialTheme.colorScheme.tertiary
+        research.qualityScore >= 30 -> MaterialTheme.colorScheme.secondary
+        research.qualityScore > 0 -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.outline
     }
     
     Row(
@@ -282,11 +282,7 @@ fun ResearchQualityIndicator(research: ResearchResult) {
             .padding(12.dp)
     ) {
         Icon(
-            when (research.qualityLevel) {
-                QualityLevel.EXCELLENT -> Icons.Default.Verified
-                QualityLevel.OFFLINE -> Icons.Default.CloudOff
-                else -> Icons.Default.Analytics
-            },
+            if (research.qualityScore >= 70) Icons.Default.Verified else Icons.Default.Analytics,
             contentDescription = null,
             tint = color
         )
@@ -317,6 +313,7 @@ fun ResearchQualityIndicator(research: ResearchResult) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CaptionCard(
     caption: GenerationResult,
@@ -399,7 +396,10 @@ fun DebugBottomSheet(
     val debugInfo = remember { viewModel.getDebugInfo() }
     val providerHealth by viewModel.providerHealth.collectAsStateWithLifecycle()
     
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

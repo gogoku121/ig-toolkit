@@ -77,7 +77,7 @@ class CaptionGenerator {
      * Generate multiple versions
      */
     fun generateMultiple(request: GenerationRequest, research: ResearchResult?, count: Int = 3): List<GenerationResult> {
-        return (1..count).map { version ->
+        return (1..count).map { version: Int ->
             val result = generate(request.copy(versions = version), research)
             result.copy(version = version)
         }
@@ -151,8 +151,8 @@ class CaptionGenerator {
             
             append("Exceptional quality meets intentional living.\n\n")
             
-            research?.keywords?.take(3).forEach { keyword ->
-                append("• ${keyword.word.replaceFirstChar { it.uppercase() }}\n")
+            research?.keywords?.take(3)?.forEach { kw: Keyword ->
+                append("• ${kw.word.replaceFirstChar { c -> c.uppercase() }}\n")
             }
         }
     }
@@ -167,8 +167,8 @@ class CaptionGenerator {
             
             if (research?.keywords?.isNotEmpty() == true) {
                 append("Key concepts:\n")
-                research.keywords.take(4).forEach { keyword ->
-                    append("• ${keyword.word.replaceFirstChar { it.uppercase() }}\n")
+                research.keywords.take(4).forEach { kw: Keyword ->
+                    append("• ${kw.word.replaceFirstChar { c -> c.uppercase() }}\n")
                 }
                 append("\n")
             }
@@ -253,8 +253,8 @@ class CaptionGenerator {
         ))
         
         // Add research-based hashtags if available
-        research?.entities?.take(2)?.forEach { entity ->
-            hashtags.add("#${entity.name.replace(" ", "")}")
+        research?.entities?.take(2)?.forEach { ent: Entity ->
+            hashtags.add("#${ent.name.replace(" ", "")}")
         }
         
         return hashtags.distinct().take(15)
