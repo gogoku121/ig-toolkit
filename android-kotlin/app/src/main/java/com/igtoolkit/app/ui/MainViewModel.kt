@@ -12,6 +12,13 @@ class MainViewModel : ViewModel() {
     private val researchEngine = ResearchEngine()
     private val captionGenerator = CaptionGenerator()
     
+    // Initialize SerpAPI with the provided key
+    init {
+        val apiKey = "543b768e80f309685d35fd0408f360e3daf2e35243a86627777c0add55a5024a"
+        researchEngine.setApiKey("serpapi", apiKey)
+        println("MAINVIEWMODEL_DEBUG: SerpAPI key set: ${apiKey.take(8)}...")
+    }
+    
     // UI State
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()

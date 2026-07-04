@@ -341,14 +341,18 @@ class ResearchEngine(
         val providers = providerManager.getProviders()
         val healthMap = _providerHealth.value
         
-        return providers
-            .filter { (key, config) ->
-                config.enabled && healthMap[key]?.isHealthy != false
-            }
-            .map { it.key }
-            .also { list ->
-                addLog("Healthy providers: ${list.joinToString()}")
-            }
+        // Debug: log all providers and their health status
+        addLog("DEBUG: Checking ${providers.size} providers", LogType.INFO)
+        providers.forEach { (key, config) ->
+            val isHealthy = config.enabled && (healthMap[key]?.isHealthy != false)
+            val hasApiKey = !config.apiKey.isNullOrEmpty()
+            addLog("DEBUG: $key - enabled=${config.enabled}, apiKey=${if (hasApiKey) "YES" else "NO"}, health=${healthMap[key]?.isHealthy}", LogType.INFO)
+        }
+        
+        val healthy = providerManager.getHealthyProviders()
+        addLog("DEBUG: getHealthyProviders() returned: ${healthy.joinToString()}", LogType.INFO)
+        
+        return healthy
     }
     
     /**
@@ -483,39 +487,13 @@ class ResearchEngine(
  */
 class NetworkChecker {
     private var lastCheckTime: Long = 0
-    private var lastResult: Boolean = false
+    private var lastResult: Boolean = true // Default to true - don't block network
     private val checkIntervalMs: Long = 5000 // 5 seconds cache
     
     fun isNetworkAvailable(): Boolean {
-        val now = System.currentTimeMillis()
-        if (now - lastCheckTime < checkIntervalMs) {
-            return lastResult
-        }
-        
-        // Perform actual network check
-        lastResult = performNetworkCheck()
-        lastCheckTime = now
-        return lastResult
-    }
-    
-    private fun performNetworkCheck(): Boolean {
-        return try {
-            val runtime = Runtime.getRuntime()
-            val process = runtime.exec("/system/bin/ping -c 1 -W 2 8.8.8.8")
-            val exitValue = process.waitFor()
-            exitValue == 0
-        } catch (e: Exception) {
-            // If ping fails, try socket connection
-            try {
-                val socket = java.net.InetSocketAddress("www.google.com", 80)
-                val socketConnection = java.net.Socket()
-                socketConnection.connect(socket, 3000)
-                socketConnection.close()
-                true
-            } catch (e2: Exception) {
-                false
-            }
-        }
+        // Skip network check - trust that Android has network if app is running
+        // This allows providers to fail naturally and be retried
+        return true
     }
 }
 

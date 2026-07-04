@@ -77,7 +77,14 @@ class ProviderManager {
     }
     
     fun getHealthyProviders(): List<String> {
-        return providers.filter { isProviderHealthy(it.key) }.keys.toList()
+        val healthy = providers.filter { isProviderHealthy(it.key) }
+        
+        // Priority order: serpapi first if API key is configured, then duckduckgo
+        val orderedKeys = listOf("serpapi", "duckduckgo")
+        
+        return orderedKeys
+            .filter { healthy.containsKey(it) }
+            .mapNotNull { key -> healthy[key]?.let { key } }
     }
     
     suspend fun search(query: String, providerKey: String = "duckduckgo"): SearchResponse {
@@ -188,9 +195,17 @@ class ProviderManager {
     }
     
     private fun searchSerpApi(query: String, provider: ProviderConfig): SearchResponse {
-        val apiKey = provider.apiKey ?: return SearchResponse(false, error = "Missing API key", errorType = ErrorType.MISSING_KEY)
+        val apiKey = provider.apiKey 
+        if (apiKey.isNullOrEmpty()) {
+            return SearchResponse(false, error = "Missing API key", errorType = ErrorType.MISSING_KEY)
+        }
+        
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
         val url = "${provider.baseUrl}?q=$encodedQuery&api_key=$apiKey"
+        
+        // Log the request (without the key)
+        println("SERPAPI_DEBUG: Making request to ${provider.baseUrl} with query: $query")
+        println("SERPAPI_DEBUG: API key configured: ${apiKey.take(8)}...")
         
         val request = Request.Builder()
             .url(url)
@@ -199,12 +214,18 @@ class ProviderManager {
         
         return try {
             val response = httpClient.newCall(request).execute()
+            println("SERPAPI_DEBUG: Response code: ${response.code}")
             
             if (!response.isSuccessful) {
+                val errorMsg = when (response.code) {
+                    401, 403 -> "Invalid API key"
+                    429 -> "Rate limit exceeded"
+                    else -> "HTTP ${response.code}"
+                }
                 return when (response.code) {
-                    401, 403 -> SearchResponse(false, error = "Invalid API key", errorType = ErrorType.AUTH_FAILED)
-                    429 -> SearchResponse(false, error = "Rate limit exceeded", errorType = ErrorType.RATE_LIMIT)
-                    else -> SearchResponse(false, error = "HTTP ${response.code}", errorType = ErrorType.NETWORK_ERROR)
+                    401, 403 -> SearchResponse(false, error = errorMsg, errorType = ErrorType.AUTH_FAILED)
+                    429 -> SearchResponse(false, error = errorMsg, errorType = ErrorType.RATE_LIMIT)
+                    else -> SearchResponse(false, error = errorMsg, errorType = ErrorType.NETWORK_ERROR)
                 }
             }
             
@@ -216,6 +237,12 @@ class ProviderManager {
             
             val json = JSONObject(body)
             val results = mutableListOf<SearchResult>()
+            
+            // Check for SerpAPI error messages
+            if (json.has("error")) {
+                val errorMsg = json.getString("error")
+                return SearchResponse(false, error = "SerpAPI error: $errorMsg", errorType = ErrorType.NETWORK_ERROR)
+            }
             
             // Extract organic results
             if (json.has("organic_results")) {
@@ -231,6 +258,8 @@ class ProviderManager {
                 }
             }
             
+            println("SERPAPI_DEBUG: Extracted ${results.size} results")
+            
             if (results.isEmpty()) {
                 return SearchResponse(false, error = "No results found", errorType = ErrorType.EMPTY_RESPONSE)
             }
@@ -238,7 +267,8 @@ class ProviderManager {
             SearchResponse(true, results = results)
             
         } catch (e: Exception) {
-            SearchResponse(false, error = e.message ?: "Network error", errorType = ErrorType.NETWORK_ERROR)
+            println("SERPAPI_DEBUG: Exception: ${e.message}")
+            return SearchResponse(false, error = e.message ?: "Network error", errorType = ErrorType.NETWORK_ERROR)
         }
     }
 }
