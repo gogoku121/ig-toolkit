@@ -1,11 +1,11 @@
-// Enhanced Caption Generator using intelligent pipeline
-import { IntelligencePipeline } from '../core/intelligence/IntelligencePipeline.js';
+// Enhanced Caption Generator using SmartContentGenerator
+import { SmartContentGenerator } from '../core/intelligence/SmartContentGenerator.js';
 import { PERSONALITY_PRESETS, GOALS, AUDIENCES } from '../core/enhanced/Presets.js';
 import { shuffle } from '../core/contentData.js';
 
 export class EnhancedCaptionGenerator {
   constructor() {
-    this.pipeline = new IntelligencePipeline();
+    this.generator = new SmartContentGenerator();
   }
 
   static generate(options = {}) {
@@ -24,37 +24,65 @@ export class EnhancedCaptionGenerator {
       throw new Error('Topic is required');
     }
 
-    // Use the new intelligence pipeline
-    const result = new EnhancedCaptionGenerator().pipeline.generate({
-      topic: topic.trim(),
-      personality: personality === 'default' ? EnhancedCaptionGenerator._selectDefaultPersonality(tone) : personality,
-      goal,
-      audience,
-      tone,
-      pattern,
-      versions
-    });
+    const selectedPersonality = personality === 'default' 
+      ? EnhancedCaptionGenerator._selectDefaultPersonality(tone) 
+      : personality;
 
-    // Format output to match expected format
-    return result.versions.map((version, index) => ({
-      id: `caption-${Date.now()}-${index}`,
-      type: 'caption',
-      title: `Version ${index + 1}${version.isBest ? ' ⭐ Best' : ''}`,
-      content: version.humanizedContent || version.rawContent,
-      metadata: {
-        tone,
-        length,
-        personality: result.personality,
+    const results = [];
+
+    // Generate multiple versions using SmartContentGenerator
+    for (let i = 0; i < versions; i++) {
+      const result = new EnhancedCaptionGenerator().generator.generate({
+        topic: topic.trim(),
+        personality: selectedPersonality,
         goal,
         audience,
-        pattern: version.strategy,
-        score: version.finalScore,
-        grade: version.scores?.grade,
-        category: result.category,
-        entity: result.primaryEntity,
-        rank: version.rank
-      }
-    }));
+        strategy: pattern
+      });
+
+      results.push({
+        id: `caption-${Date.now()}-${i}`,
+        type: 'caption',
+        title: `Version ${i + 1}${i === 0 ? ' ⭐ Best' : ''}`,
+        content: result.content,
+        metadata: {
+          tone,
+          length,
+          personality: selectedPersonality,
+          goal,
+          audience,
+          pattern: result.strategy,
+          score: result.critique?.scores?.overall || 75,
+          grade: EnhancedCaptionGenerator._getGrade(result.critique?.scores?.overall || 75),
+          category: result.packName,
+          strategy: result.strategy,
+          sections: Object.keys(result.sections || {}),
+          rank: i === 0 ? 1 : i + 1
+        }
+      });
+    }
+
+    // Sort by score
+    results.sort((a, b) => b.metadata.score - a.metadata.score);
+    
+    // Re-rank and update titles
+    results.forEach((result, index) => {
+      result.metadata.rank = index + 1;
+      result.title = `Version ${index + 1}${index === 0 ? ' ⭐ Best' : ''}`;
+    });
+
+    return results;
+  }
+
+  static _getGrade(score) {
+    if (score >= 95) return 'A+';
+    if (score >= 90) return 'A';
+    if (score >= 85) return 'B+';
+    if (score >= 80) return 'B';
+    if (score >= 75) return 'C+';
+    if (score >= 70) return 'C';
+    if (score >= 60) return 'D';
+    return 'F';
   }
 
   static _selectDefaultPersonality(tone) {
