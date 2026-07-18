@@ -1,11 +1,14 @@
 package com.igtoolkit.app.domain.engine
 
 import com.igtoolkit.app.domain.model.*
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Research Extractor - Extracts structured data from search results
  */
-class ResearchExtractor {
+@Singleton
+class ResearchExtractor @Inject constructor() {
     
     /**
      * Extract all structured data from search results

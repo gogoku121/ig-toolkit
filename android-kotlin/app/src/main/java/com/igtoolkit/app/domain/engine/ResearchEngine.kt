@@ -4,10 +4,12 @@ import com.igtoolkit.app.domain.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Research Engine - Main orchestrator with proper error handling and provider selection
- * 
+ *
  * Research Pipeline:
  * 1. Check network connectivity
  * 2. Try each provider in priority order
@@ -15,14 +17,14 @@ import kotlinx.coroutines.flow.asStateFlow
  * 4. Cache successful research
  * 5. Fall back to OFFLINE only when ALL providers fail
  */
-class ResearchEngine(
-    private val networkChecker: NetworkChecker = NetworkChecker()
+@Singleton
+class ResearchEngine @Inject constructor(
+    private val networkChecker: NetworkChecker,
+    private val providerManager: ProviderManager,
+    private val researchCache: ResearchCache,
+    private val qualityScorer: QualityScorer,
+    private val extractor: ResearchExtractor
 ) {
-    
-    private val providerManager = ProviderManager()
-    private val researchCache = ResearchCache()
-    private val qualityScorer = QualityScorer()
-    private val extractor = ResearchExtractor()
     
     // Research state
     private val _currentMode = MutableStateFlow(ResearchMode.OFFLINE)
@@ -485,7 +487,8 @@ class ResearchEngine(
 /**
  * Network connectivity checker
  */
-class NetworkChecker {
+@Singleton
+class NetworkChecker @Inject constructor() {
     private var lastCheckTime: Long = 0
     private var lastResult: Boolean = true // Default to true - don't block network
     private val checkIntervalMs: Long = 5000 // 5 seconds cache

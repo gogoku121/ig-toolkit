@@ -1,12 +1,15 @@
 package com.igtoolkit.app.domain.engine
 
 import com.igtoolkit.app.domain.model.*
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Research Quality Scorer
  * Scores research based on 7 criteria
  */
-class QualityScorer {
+@Singleton
+class QualityScorer @Inject constructor() {
     
     private val weights = mapOf(
         "results" to 20,

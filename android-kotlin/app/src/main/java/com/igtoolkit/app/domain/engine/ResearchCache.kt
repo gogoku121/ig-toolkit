@@ -2,11 +2,14 @@ package com.igtoolkit.app.domain.engine
 
 import com.igtoolkit.app.domain.model.SearchResult
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Research Cache - Simple in-memory cache with TTL
  */
-class ResearchCache {
+@Singleton
+class ResearchCache @Inject constructor() {
     
     private val cache = ConcurrentHashMap<String, CacheEntry>()
     private val ttlMs: Long = 30 * 60 * 1000 // 30 minutes

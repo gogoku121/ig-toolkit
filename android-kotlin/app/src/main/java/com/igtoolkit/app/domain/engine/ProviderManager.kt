@@ -9,12 +9,15 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.net.URLEncoder
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Provider Manager with explicit failure handling and auto-failover
  */
-class ProviderManager {
-    
+@Singleton
+class ProviderManager @Inject constructor() {
+
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)

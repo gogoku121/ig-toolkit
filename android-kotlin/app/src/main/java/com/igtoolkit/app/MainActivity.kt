@@ -5,24 +5,24 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModelProvider
 import com.igtoolkit.app.ui.MainViewModel
 import com.igtoolkit.app.ui.screens.MainScreen
 import com.igtoolkit.app.ui.theme.IGTOOLKITTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    
-    private lateinit var viewModel: MainViewModel
-    
+
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        
+
         setContent {
             IGTOOLKITTheme {
                 Surface(

@@ -5,11 +5,19 @@ node_modules/
 dist/
 build/
 
-# Android
+# Android (legacy Capacitor app)
 android/.gradle/
 android/app/build/
 android/build/
 android/.idea/
+
+# Android (native Kotlin app)
+android-kotlin/.gradle/
+android-kotlin/app/build/
+android-kotlin/build/
+android-kotlin/.idea/
+android-kotlin/.kotlin/
+
 *.apk
 *.aab
 

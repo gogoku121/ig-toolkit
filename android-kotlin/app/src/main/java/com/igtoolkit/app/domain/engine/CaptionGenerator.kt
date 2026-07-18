@@ -2,11 +2,15 @@ package com.igtoolkit.app.domain.engine
 
 import com.igtoolkit.app.domain.model.*
 import kotlin.random.Random
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * Caption Generator - AI-powered content generation
+ * Caption Generator - currently template-based (see TASKS.md: replacing with
+ * a real LLM call via the backend proxy is tracked separately).
  */
-class CaptionGenerator {
+@Singleton
+class CaptionGenerator @Inject constructor() {
     
     private val openingHooks = listOf(
         "Here's what nobody tells you about",

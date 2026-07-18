@@ -1,5 +1,17 @@
 # DECISIONS.md
 
+## Adopted Hilt for dependency injection instead of manual construction
+- **Decision:** All engine classes (`ProviderManager`, `ResearchCache`, `QualityScorer`, `ResearchExtractor`, `NetworkChecker`, `ResearchEngine`, `CaptionGenerator`) now use `@Inject constructor()` and are provided as `@Singleton`s; `MainViewModel` is `@HiltViewModel`; `MainActivity` uses `@AndroidEntryPoint`.
+- **Reason:** The original code had `MainViewModel` directly constructing `ResearchEngine()` and `CaptionGenerator()`, which themselves directly constructed their own dependencies internally. This tight coupling made the classes impossible to unit test (no way to substitute a fake `ProviderManager` in `ResearchEngine`, for example) and was flagged as the #1 architecture issue in the audit (3/10).
+- **Alternatives considered:** Manual DI (factory functions/service locator) — rejected as still ad-hoc and not idiomatic for the rest of the Android ecosystem (Room, WorkManager, Navigation all have first-class Hilt integration); Koin — viable alternative, but Hilt is the Google-recommended default and has less runtime reflection overhead.
+- **Trade-offs:** Adds KSP annotation processing to the build (slightly longer build times — this build went from 2m52s to 3m10s baseline), but unlocks proper testability and is a prerequisite for Room/WorkManager integration.
+
+## Deferred: physical folder restructuring into data/domain/presentation layers
+- **Decision:** Did the Hilt DI wiring (removing tight coupling) without also physically moving files into `data/remote/`, `data/local/`, `presentation/` folders in the same pass.
+- **Reason:** The DI wiring alone already delivers the testability/coupling win; a large file-move in the same commit would make the diff much harder to review and increases risk of merge/rename mistakes. Splitting the two concerns into separate, independently-verifiable steps follows the "explain why, show before/after, verify build" workflow requested for this effort.
+- **Alternatives considered:** Doing both at once — rejected for the reason above.
+- **Trade-offs:** Folder structure still doesn't reflect the "3/10 → target" architecture goal yet; tracked as a follow-up in TASKS.md/PROGRESS.md rather than considered done.
+
 ## Secrets moved server-side via a new backend proxy, not just deleted from git
 - **Decision:** Instead of only removing the hardcoded SerpAPI key and MinIO admin password from source, stood up a small `backend/` FastAPI service that holds both secrets server-side and exposes safe, narrow endpoints (`/research`, `/apk/latest`) for the Android app to call.
 - **Reason:** This is a distributed Android app — any secret embedded in app source ships inside the built APK and can be recovered by decompiling it, independent of whether it's also visible in git history. Removing a secret from source without changing the architecture would have just re-hidden the same problem. The user explicitly wants end users to never interact with (or be able to extract) these credentials.

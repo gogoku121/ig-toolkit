@@ -4,14 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.igtoolkit.app.domain.engine.*
 import com.igtoolkit.app.domain.model.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
-    
-    private val researchEngine = ResearchEngine()
-    private val captionGenerator = CaptionGenerator()
-    
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val researchEngine: ResearchEngine,
+    private val captionGenerator: CaptionGenerator
+) : ViewModel() {
+
     // Configure the app-level shared secret for our backend proxy (not the
     // real SerpAPI key — that stays server-side, see backend/README.md).
     init {
