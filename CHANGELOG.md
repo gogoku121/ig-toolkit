@@ -103,6 +103,12 @@ Auto-select, Storytelling, Before/After, Problem/Solution, Listicle, Case Study,
 - Real LLM-based caption generation: new `POST /generate` backend endpoint (Groq), new `LlmCaptionClient` on the Android side. Used as the primary generation path when the backend is configured, with automatic fallback to the existing offline template generator on any failure.
 - `GenerationResult.aiGenerated` flag to distinguish AI-generated vs. template-generated captions.
 - Room persistence: `DraftEntity`/`DraftDao`/`AppDatabase`, every generated caption version is now auto-saved and exposed via `MainViewModel.drafts`. No UI to browse drafts yet (data layer only).
+- First unit test suite: `QualityScorerTest`, `CaptionGeneratorTest`, `MainViewModelTest` (MockK, kotlinx-coroutines-test, Turbine added as test deps). 12 tests, all passing.
+
+### Verified
+- `./gradlew assembleDebug` — BUILD SUCCESSFUL
+- `./gradlew testDebugUnitTest` — 12/12 tests passing
+- `./gradlew lintDebug` — BUILD SUCCESSFUL
 
 ### Fixed
 - `android-kotlin/.gradle/` (Gradle's local build cache) was accidentally tracked in git; untracked and gitignored properly.

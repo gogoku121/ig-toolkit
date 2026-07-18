@@ -16,9 +16,9 @@
 
 ### Restructure into data/domain/presentation folders
 - **Priority:** Medium
-- **Description:** Hilt DI wiring is done (engines are `@Inject`-able, testable in principle), but files still live in the original `domain/engine`/`domain/model` layout rather than proper `data/remote`, `data/local`, `presentation` layers. Deferred deliberately (see DECISIONS.md) to keep the DI change reviewable on its own.
+- **Description:** Hilt DI wiring is done (engines are `@Inject`-able and now have a first round of unit tests), but files still live in the original `domain/engine`/`domain/model` layout rather than proper `data/remote`, `data/local`, `presentation` layers (partially started — Room files already live under `data/local/`).
 - **Status:** Not started.
-- **Dependencies:** None, but do before task #6 (unit tests) so test structure mirrors the final layout.
+- **Dependencies:** None.
 
 ### Add multi-provider LLM selection (Gemini/Claude/GPT/OpenRouter/Ollama)
 - **Priority:** Low (backlog — see DECISIONS.md)

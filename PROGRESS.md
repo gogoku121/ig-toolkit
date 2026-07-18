@@ -37,6 +37,7 @@ Build baseline: `./gradlew assembleDebug` — **BUILD SUCCESSFUL** (2m52s, only 
 - [2026-07-18] Hilt DI refactor (commit `59a766e`): all engines converted to `@Inject constructor()`/`@Singleton`, `MainViewModel` → `@HiltViewModel`, `MainActivity` → `@AndroidEntryPoint`. Also fixed an unrelated bug found along the way: `android-kotlin/.gradle/` was accidentally tracked in git.
 - [2026-07-18] Real LLM caption generation (commit `6142b9b`): `POST /generate` on the backend (Groq), new `LlmCaptionClient`, `MainViewModel` tries LLM first with automatic fallback to templates. Not yet tested end-to-end (backend not deployed).
 - [2026-07-18] Room persistence for drafts: `DraftEntity`/`DraftDao`/`AppDatabase` + `DatabaseModule` (Hilt), `MainViewModel.drafts` StateFlow, every generated caption version is now saved automatically. Build verified (`./gradlew assembleDebug`, 1m11s). **Not yet surfaced in the UI** — data layer only; a drafts/history screen is a UI/UX-phase task.
+- [2026-07-18] First unit tests (Task #6): `QualityScorerTest`, `CaptionGeneratorTest`, `MainViewModelTest` (MockK + kotlinx-coroutines-test). All 12 tests pass — `./gradlew testDebugUnitTest` BUILD SUCCESSFUL. Two of my own test assertions were wrong on the first run (caught by actually running the suite, not just writing it) — fixed and documented in the test file comments. `./gradlew lintDebug` also passes cleanly.
 
 ## In Progress
 

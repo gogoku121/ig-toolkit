@@ -1,5 +1,12 @@
 # DECISIONS.md
 
+## MockK + kotlinx-coroutines-test for the first unit tests, not Mockito
+- **Decision:** Added `io.mockk`, `kotlinx-coroutines-test`, and `app.cash.turbine` as test dependencies; wrote `QualityScorerTest`, `CaptionGeneratorTest` (pure-logic classes, no mocks needed), and `MainViewModelTest` (mocks `ResearchEngine`/`CaptionGenerator`/`LlmCaptionClient`/`DraftDao`).
+- **Reason:** MockK mocks Kotlin final classes natively (the engine classes aren't behind interfaces yet — see the deferred folder-restructure task), whereas Mockito needs `mockito-inline`/careful setup to do the same. `kotlinx-coroutines-test`'s `StandardTestDispatcher` is needed to deterministically drive `MainViewModel`'s `viewModelScope.launch` coroutines in tests.
+- **Alternatives considered:** Mockito-Kotlin — more common historically, but MockK's DSL is more idiomatic for Kotlin and handles `StateFlow` properties on mocked classes more cleanly.
+- **Trade-offs:** None significant; this is a standard, well-supported combination for Android/Kotlin testing.
+- **Note:** the test suite caught two wrong assertions in my own first draft of `QualityScorerTest` (assumed "empty research" would score 0, but a fresh timestamp alone contributes 10 points; assumed a "rich" fixture would hit exactly 100 but I'd omitted one of 8 diversity categories) — fixed by actually running `./gradlew testDebugUnitTest` rather than assuming the tests were correct once written.
+
 ## Room persistence added at the data layer only, no UI yet
 - **Decision:** Added `DraftEntity`/`DraftDao`/`AppDatabase` (Room) and wired `MainViewModel` to auto-save every generated caption version and expose a `drafts` StateFlow. Did not add a drafts/history screen in the same pass.
 - **Reason:** The app previously lost all generated captions on process death (audit flagged this — no `SavedStateHandle`, no persistence at all). Room is the standard Android solution and was already implied by the brief. Building the data layer first, UI later, follows the same "don't bundle unrelated concerns in one diff" approach used for the Hilt refactor.
