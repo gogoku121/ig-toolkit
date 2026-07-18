@@ -12,11 +12,14 @@ class MainViewModel : ViewModel() {
     private val researchEngine = ResearchEngine()
     private val captionGenerator = CaptionGenerator()
     
-    // Initialize SerpAPI with the provided key
+    // Configure the app-level shared secret for our backend proxy (not the
+    // real SerpAPI key — that stays server-side, see backend/README.md).
     init {
-        val apiKey = "543b768e80f309685d35fd0408f360e3daf2e35243a86627777c0add55a5024a"
-        researchEngine.setApiKey("serpapi", apiKey)
-        println("MAINVIEWMODEL_DEBUG: SerpAPI key set: ${apiKey.take(8)}...")
+        val backendAppKey = com.igtoolkit.app.BuildConfig.RESEARCH_BACKEND_APP_KEY
+        if (backendAppKey.isNotEmpty()) {
+            researchEngine.setApiKey("serpapi", backendAppKey)
+        }
+        println("MAINVIEWMODEL_DEBUG: backend proxy configured: ${backendAppKey.isNotEmpty()}")
     }
     
     // UI State

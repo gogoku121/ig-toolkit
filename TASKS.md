@@ -1,0 +1,54 @@
+# TASKS.md
+
+## In Progress
+
+### Deploy backend/ proxy service
+- **Priority:** High
+- **Description:** Decide hosting (previously deferred — "decide hosting later") and deploy the FastAPI proxy so `RESEARCH_BACKEND_URL` can be set for real builds. Until then, the app's SerpAPI path is disabled and it falls back to DuckDuckGo only.
+- **Status:** Not started.
+- **Dependencies:** None.
+
+## Upcoming
+
+### Rotate exposed credentials (repo owner action)
+- **Priority:** Critical
+- **Description:** Change the MinIO admin password (`admin` / previously `Goku78700#123`, also used for the user's personal MinIO instance elsewhere) and regenerate the SerpAPI key. Both were committed in plaintext to this public GitHub repo since 2026-07-04.
+- **Status:** Not started — requires the repo owner to act directly (outside assistant access).
+- **Dependencies:** None, should happen ASAP regardless of other work.
+
+### Set RESEARCH_BACKEND_URL / RESEARCH_BACKEND_APP_KEY for real builds
+- **Priority:** High
+- **Description:** Once backend is deployed, set these as env vars when running `./gradlew assembleDebug`/`assembleRelease` (see `android-kotlin/app/build.gradle.kts`).
+- **Status:** Not started.
+- **Dependencies:** Deploy backend/ proxy service.
+
+### Decide fate of legacy web app
+- **Priority:** Low
+- **Description:** `android/`, `src/`, `www/`, `components/`, `core/`, `generators/` are the pre-Kotlin-pivot Capacitor web app. Decide whether to delete or keep for reference/history.
+- **Status:** Not started.
+- **Dependencies:** None.
+
+### Add a pre-commit secret scan
+- **Priority:** Medium
+- **Description:** Add a tool like `gitleaks` as a pre-commit hook so hardcoded secrets can't be committed again.
+- **Status:** Not started.
+- **Dependencies:** None.
+
+### Consider scrubbing old secrets from git history
+- **Priority:** Low (optional — exposure already happened)
+- **Description:** The old plaintext MinIO password and SerpAPI key remain visible in earlier commits' history even after removal from HEAD. Only useful for hygiene once rotation is complete — does not undo the exposure.
+- **Status:** Not started.
+- **Dependencies:** Rotate exposed credentials first.
+
+### Add automated tests
+- **Priority:** Medium
+- **Description:** No tests currently exist for the Kotlin app or the backend proxy.
+- **Status:** Not started.
+- **Dependencies:** None.
+
+## Completed
+- Native Kotlin Android app with Research Engine, provider failover, quality scoring, debug panel — prior sessions (see CHANGELOG.md)
+- Identified live secrets (SerpAPI key, MinIO password) committed to the public repo — 2026-07-18
+- Built `backend/` FastAPI proxy (`/research`, `/apk/latest`, `/health`) — 2026-07-18
+- Removed hardcoded secrets from `MainViewModel.kt`/`ProviderManager.kt`/`AGENTS.md`; wired Android build to inject backend config via env vars — 2026-07-18
+- Created PROJECT.md, TASKS.md, DECISIONS.md documentation set — 2026-07-18

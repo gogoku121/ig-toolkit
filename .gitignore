@@ -28,3 +28,16 @@ Thumbs.db
 # Capacitor
 www/
 plugins/
+
+# Backend proxy (Python)
+backend/venv/
+backend/__pycache__/
+backend/.env
+
+# Android build config secrets are injected via env vars at build time
+# (see android-kotlin/app/build.gradle.kts) — nothing to ignore here, but
+# never hardcode RESEARCH_BACKEND_URL / RESEARCH_BACKEND_APP_KEY as literals.
+
+# Environment files in general
+.env
+android-kotlin/local.properties

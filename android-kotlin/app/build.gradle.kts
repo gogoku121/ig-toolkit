@@ -18,6 +18,21 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Backend proxy config — set via env vars at build time so no secret
+        // is ever committed to source. See backend/README.md for what this
+        // service does and why (it keeps the real SerpAPI key + MinIO creds
+        // off the device entirely).
+        buildConfigField(
+            "String",
+            "RESEARCH_BACKEND_URL",
+            "\"${System.getenv("RESEARCH_BACKEND_URL") ?: ""}\""
+        )
+        buildConfigField(
+            "String",
+            "RESEARCH_BACKEND_APP_KEY",
+            "\"${System.getenv("RESEARCH_BACKEND_APP_KEY") ?: ""}\""
+        )
     }
 
     buildTypes {
@@ -38,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.5"

@@ -93,6 +93,10 @@ Auto-select, Storytelling, Before/After, Problem/Solution, Listicle, Case Study,
 
 ## [Unreleased]
 
+### Security
+- Removed a hardcoded SerpAPI key from `MainViewModel.kt` and a plaintext MinIO admin password from `AGENTS.md` — both had been committed to this public repo since 2026-07-04. Added a `backend/` FastAPI proxy service that holds both secrets server-side; the Android app now calls `/research` and `/apk/latest` on that backend instead of calling SerpAPI/MinIO directly. See `DECISIONS.md`.
+- **Action still required by repo owner:** rotate the exposed SerpAPI key and MinIO admin password — removing them from the current code does not undo the ~2-week public exposure.
+
 ### Planned
 - LLM API integration for enhanced generation
 - A/B testing framework
@@ -101,3 +105,4 @@ Auto-select, Storytelling, Before/After, Problem/Solution, Listicle, Case Study,
 - Export history to JSON/CSV
 - Batch generation
 - Content scheduling
+- Deploy the new `backend/` proxy service somewhere reachable (hosting location not yet decided)

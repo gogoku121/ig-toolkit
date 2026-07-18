@@ -15,7 +15,7 @@
 
 ### Install APK
 
-Download `ig-toolkit-kotlin-v1.apk` from MinIO and install on your Android device.
+Get a short-lived download link via the backend proxy's `/apk/latest` endpoint (see `backend/README.md`) and install on your Android device. Direct MinIO access is no longer required or exposed to end users.
 
 ### Build from Source
 
@@ -37,6 +37,7 @@ cd android-kotlin
 
 ```
 ├── android-kotlin/     # Native Kotlin Android app (Jetpack Compose)
+├── backend/            # FastAPI proxy — keeps SerpAPI key & MinIO creds off the device
 ├── android/           # Capacitor WebView app (legacy)
 ├── src/               # Web app source files (legacy)
 └── docs/              # Documentation

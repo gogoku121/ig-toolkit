@@ -1,5 +1,6 @@
 package com.igtoolkit.app.domain.engine
 
+import com.igtoolkit.app.BuildConfig
 import com.igtoolkit.app.domain.model.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,12 +30,15 @@ class ProviderManager {
             requiresApiKey = false,
             enabled = true
         ))
-        
+
+        // Routed through our own backend proxy (see backend/README.md) so the
+        // real SerpAPI key never ships inside the app. "apiKey" here is the
+        // app-level shared secret sent as X-App-Key, not the SerpAPI key.
         registerProvider("serpapi", ProviderConfig(
-            name = "SerpAPI (Google)",
-            baseUrl = "https://serpapi.com/search.json",
+            name = "SerpAPI (Google, via backend proxy)",
+            baseUrl = "${BuildConfig.RESEARCH_BACKEND_URL}/research",
             requiresApiKey = true,
-            enabled = true
+            enabled = BuildConfig.RESEARCH_BACKEND_URL.isNotEmpty()
         ))
     }
     
@@ -195,20 +199,22 @@ class ProviderManager {
     }
     
     private fun searchSerpApi(query: String, provider: ProviderConfig): SearchResponse {
-        val apiKey = provider.apiKey 
-        if (apiKey.isNullOrEmpty()) {
-            return SearchResponse(false, error = "Missing API key", errorType = ErrorType.MISSING_KEY)
+        // "apiKey" here is the app-level shared secret for our own backend
+        // proxy (X-App-Key), not the real SerpAPI key — the backend holds
+        // that server-side. See backend/README.md.
+        val appKey = provider.apiKey
+        if (appKey.isNullOrEmpty()) {
+            return SearchResponse(false, error = "Backend not configured", errorType = ErrorType.MISSING_KEY)
         }
-        
+
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        val url = "${provider.baseUrl}?q=$encodedQuery&api_key=$apiKey"
-        
-        // Log the request (without the key)
-        println("SERPAPI_DEBUG: Making request to ${provider.baseUrl} with query: $query")
-        println("SERPAPI_DEBUG: API key configured: ${apiKey.take(8)}...")
-        
+        val url = "${provider.baseUrl}?q=$encodedQuery"
+
+        println("SERPAPI_DEBUG: Making request to backend proxy with query: $query")
+
         val request = Request.Builder()
             .url(url)
+            .header("X-App-Key", appKey)
             .get()
             .build()
         
