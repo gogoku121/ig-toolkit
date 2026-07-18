@@ -122,7 +122,8 @@ data class GenerationResult(
     val hashtags: List<String> = emptyList(),
     val version: Int = 1,
     val quality: Int = 0,
-    val researchUsed: Boolean = false
+    val researchUsed: Boolean = false,
+    val aiGenerated: Boolean = false
 )
 
 /**

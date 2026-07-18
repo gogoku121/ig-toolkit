@@ -37,8 +37,9 @@ Build baseline: `./gradlew assembleDebug` — **BUILD SUCCESSFUL** (2m52s, only 
 
 ## In Progress
 
-- Architecture refactor (Task #3): Hilt DI wiring is done — `ProviderManager`, `ResearchCache`, `QualityScorer`, `ResearchExtractor`, `NetworkChecker`, `ResearchEngine`, `CaptionGenerator` all use `@Inject constructor()`/`@Singleton`; `MainViewModel` is now `@HiltViewModel`; `MainActivity` uses `@AndroidEntryPoint` + `by viewModels()`. **Not yet done:** physical folder restructuring into `data/remote`, `data/local`, `presentation` layers, and extracting interfaces (needed for task #6, unit tests) — deferred as a follow-up since the DI wiring alone already removes the tightest coupling (manual `ResearchEngine()`/`CaptionGenerator()` construction) without a disruptive file-move.
-  - Build verified: `./gradlew assembleDebug` — BUILD SUCCESSFUL (3m10s) after full Hilt wiring.
+- Task #4 (real LLM integration): backend `/generate` endpoint added (calls Groq's chat completions API server-side, `GROQ_API_KEY`/`GROQ_MODEL` configurable, returns structured JSON captions). Android side: new `LlmCaptionClient` calls this endpoint; `MainViewModel.generate()` now tries the LLM path first when the backend is configured, falling back to the existing template `CaptionGenerator` on any failure (network error, backend not configured, rate limit, malformed model output). `GenerationResult.aiGenerated` flag added so the UI can eventually distinguish AI vs. template output (not yet surfaced in the UI itself — that's part of the later UI/UX phase).
+  - Build verified: `./gradlew assembleDebug` — BUILD SUCCESSFUL (48s, incremental) after wiring in `LlmCaptionClient`.
+  - **Not yet tested against a real deployment** — `backend/` still isn't deployed anywhere (open task), so this path is code-complete but unverified end-to-end. Falls back to templates safely if backend is unreachable, so this is safe to ship as-is.
 
 ## Remaining (backlog, roughly in priority order)
 

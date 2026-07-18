@@ -97,12 +97,25 @@ Auto-select, Storytelling, Before/After, Problem/Solution, Listicle, Case Study,
 - Removed a hardcoded SerpAPI key from `MainViewModel.kt` and a plaintext MinIO admin password from `AGENTS.md` — both had been committed to this public repo since 2026-07-04. Added a `backend/` FastAPI proxy service that holds both secrets server-side; the Android app now calls `/research` and `/apk/latest` on that backend instead of calling SerpAPI/MinIO directly. See `DECISIONS.md`.
 - **Action still required by repo owner:** rotate the exposed SerpAPI key and MinIO admin password — removing them from the current code does not undo the ~2-week public exposure.
 
+### Added
+- Full codebase audit (14 categories, scored) as the starting point for a larger production-readiness effort — see `PROGRESS.md`.
+- Hilt dependency injection across all engine classes and `MainViewModel`/`MainActivity`, replacing manual `ResearchEngine()`/`CaptionGenerator()` construction. Fixes the tight coupling that made unit testing impossible.
+- Real LLM-based caption generation: new `POST /generate` backend endpoint (Groq), new `LlmCaptionClient` on the Android side. Used as the primary generation path when the backend is configured, with automatic fallback to the existing offline template generator on any failure.
+- `GenerationResult.aiGenerated` flag to distinguish AI-generated vs. template-generated captions.
+
+### Fixed
+- `android-kotlin/.gradle/` (Gradle's local build cache) was accidentally tracked in git; untracked and gitignored properly.
+- `AndroidManifest.xml`: `allowBackup` flipped from `true` to `false` (flagged in the audit — app data including cached research was being included in ADB/cloud backups).
+
 ### Planned
-- LLM API integration for enhanced generation
+- Deploy the `backend/` proxy service somewhere reachable (hosting location not yet decided) — blocks testing the new LLM path end-to-end
+- Restructure into data/domain/presentation folder layers
+- Room persistence for drafts/history
+- Unit tests for engines/ViewModel
+- Multi-provider LLM selection (Gemini/Claude/GPT/OpenRouter/Ollama)
 - A/B testing framework
 - User content templates library
 - Analytics dashboard
 - Export history to JSON/CSV
 - Batch generation
 - Content scheduling
-- Deploy the new `backend/` proxy service somewhere reachable (hosting location not yet decided)

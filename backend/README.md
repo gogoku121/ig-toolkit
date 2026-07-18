@@ -9,6 +9,7 @@ The Android app used to embed the SerpAPI key and a MinIO admin password directl
 ## Endpoints
 
 - `GET /research?q=<query>` — proxies to SerpAPI, returns `{"organic_results": [...]}`
+- `POST /generate` — proxies to Groq's chat completions API for real LLM-based caption generation (replaces the Android app's old template-only generator; templates remain as an offline fallback client-side). Body: `{topic, personality, personality_description, goal, versions, research_insights, research_keywords, research_pain_points, research_entities}`. Returns `{"captions": [{"caption": "...", "hashtags": [...]}], "model": "..."}`. Returns `503` if `GROQ_API_KEY` isn't configured.
 - `GET /apk/latest` — returns a short-lived (10 min) presigned MinIO URL for downloading the release APK
 - `GET /health` — liveness check
 

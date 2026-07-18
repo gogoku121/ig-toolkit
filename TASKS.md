@@ -4,9 +4,27 @@
 
 ### Deploy backend/ proxy service
 - **Priority:** High
-- **Description:** Decide hosting (previously deferred — "decide hosting later") and deploy the FastAPI proxy so `RESEARCH_BACKEND_URL` can be set for real builds. Until then, the app's SerpAPI path is disabled and it falls back to DuckDuckGo only.
+- **Description:** Decide hosting (previously deferred — "decide hosting later") and deploy the FastAPI proxy so `RESEARCH_BACKEND_URL` can be set for real builds. Until then, the app's SerpAPI path and the new `/generate` LLM path are both effectively disabled (falls back to DuckDuckGo research and template captions respectively).
 - **Status:** Not started.
 - **Dependencies:** None.
+
+### Test real LLM caption generation end-to-end
+- **Priority:** High
+- **Description:** `LlmCaptionClient`/backend `/generate` are code-complete and build-verified, but have never been exercised against a live deployment + real Groq key. Needs a real device/emulator run once `backend/` is deployed.
+- **Status:** Not started.
+- **Dependencies:** Deploy backend/ proxy service.
+
+### Restructure into data/domain/presentation folders
+- **Priority:** Medium
+- **Description:** Hilt DI wiring is done (engines are `@Inject`-able, testable in principle), but files still live in the original `domain/engine`/`domain/model` layout rather than proper `data/remote`, `data/local`, `presentation` layers. Deferred deliberately (see DECISIONS.md) to keep the DI change reviewable on its own.
+- **Status:** Not started.
+- **Dependencies:** None, but do before task #6 (unit tests) so test structure mirrors the final layout.
+
+### Add multi-provider LLM selection (Gemini/Claude/GPT/OpenRouter/Ollama)
+- **Priority:** Low (backlog — see DECISIONS.md)
+- **Description:** Original brief asked for user-selectable providers. Deferred until the single Groq path is proven working end-to-end (see "Test real LLM caption generation end-to-end" above).
+- **Status:** Not started.
+- **Dependencies:** Test real LLM caption generation end-to-end.
 
 ## Upcoming
 

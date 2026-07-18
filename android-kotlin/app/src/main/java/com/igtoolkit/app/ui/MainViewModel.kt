@@ -12,7 +12,8 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val researchEngine: ResearchEngine,
-    private val captionGenerator: CaptionGenerator
+    private val captionGenerator: CaptionGenerator,
+    private val llmCaptionClient: LlmCaptionClient
 ) : ViewModel() {
 
     // Configure the app-level shared secret for our backend proxy (not the
@@ -121,18 +122,28 @@ class MainViewModel @Inject constructor(
                 
                 _uiState.update { it.copy(modeExplanation = modeExplanation) }
                 
-                // PHASE 2: Generate captions from research
+                // PHASE 2: Generate captions - try the real LLM first, fall back
+                // to offline templates if the backend isn't configured or fails
+                // (network error, rate limit, etc.)
                 _researchPhase.value = "Generating captions..."
-                
+
                 val request = GenerationRequest(
                     topic = state.topic,
                     personality = state.personality,
                     goal = state.goal,
                     versions = state.versions
                 )
-                
-                // Pass research to generator - it should use it!
-                val captions = captionGenerator.generateMultiple(request, research, state.versions)
+
+                val captions = if (llmCaptionClient.isConfigured) {
+                    try {
+                        llmCaptionClient.generate(request, research)
+                    } catch (e: Exception) {
+                        _uiState.update { it.copy(modeExplanation = "$modeExplanation (AI generation failed, using offline templates: ${e.message})") }
+                        captionGenerator.generateMultiple(request, research, state.versions)
+                    }
+                } else {
+                    captionGenerator.generateMultiple(request, research, state.versions)
+                }
                 _generatedCaptions.value = captions
                 
                 // Select first caption
