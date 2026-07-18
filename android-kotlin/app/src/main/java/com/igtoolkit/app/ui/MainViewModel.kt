@@ -2,6 +2,8 @@ package com.igtoolkit.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.igtoolkit.app.data.local.DraftDao
+import com.igtoolkit.app.data.local.DraftEntity
 import com.igtoolkit.app.domain.engine.*
 import com.igtoolkit.app.domain.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,8 +15,13 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val researchEngine: ResearchEngine,
     private val captionGenerator: CaptionGenerator,
-    private val llmCaptionClient: LlmCaptionClient
+    private val llmCaptionClient: LlmCaptionClient,
+    private val draftDao: DraftDao
 ) : ViewModel() {
+
+    // Persisted drafts (survives process death/app restart), newest first.
+    val drafts: StateFlow<List<DraftEntity>> = draftDao.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     // Configure the app-level shared secret for our backend proxy (not the
     // real SerpAPI key — that stays server-side, see backend/README.md).
@@ -145,9 +152,26 @@ class MainViewModel @Inject constructor(
                     captionGenerator.generateMultiple(request, research, state.versions)
                 }
                 _generatedCaptions.value = captions
-                
+
                 // Select first caption
                 _selectedCaption.value = captions.firstOrNull()
+
+                // Persist every generated version as a draft so it survives
+                // process death / app restart (see data/local/DraftEntity.kt)
+                captions.forEach { result ->
+                    draftDao.insert(
+                        DraftEntity(
+                            topic = state.topic,
+                            personality = state.personality.displayName,
+                            goal = state.goal.displayName,
+                            caption = result.caption,
+                            hashtags = result.hashtags,
+                            quality = result.quality,
+                            researchUsed = result.researchUsed,
+                            aiGenerated = result.aiGenerated
+                        )
+                    )
+                }
                 
                 _uiState.update { it.copy(isLoading = false) }
                 _researchPhase.value = "Complete"

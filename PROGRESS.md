@@ -34,12 +34,14 @@ Build baseline: `./gradlew assembleDebug` — **BUILD SUCCESSFUL** (2m52s, only 
 - [2026-07-18] Removed hardcoded SerpAPI key + MinIO admin password; added `backend/` FastAPI proxy (prior session, commit `6d20bea`, pushed to `origin/main`).
 - [2026-07-18] Full codebase audit (14 categories, scored above).
 - [2026-07-18] Installed JDK 17 (user, via sudo) and verified clean baseline build.
+- [2026-07-18] Hilt DI refactor (commit `59a766e`): all engines converted to `@Inject constructor()`/`@Singleton`, `MainViewModel` → `@HiltViewModel`, `MainActivity` → `@AndroidEntryPoint`. Also fixed an unrelated bug found along the way: `android-kotlin/.gradle/` was accidentally tracked in git.
+- [2026-07-18] Real LLM caption generation (commit `6142b9b`): `POST /generate` on the backend (Groq), new `LlmCaptionClient`, `MainViewModel` tries LLM first with automatic fallback to templates. Not yet tested end-to-end (backend not deployed).
+- [2026-07-18] Room persistence for drafts: `DraftEntity`/`DraftDao`/`AppDatabase` + `DatabaseModule` (Hilt), `MainViewModel.drafts` StateFlow, every generated caption version is now saved automatically. Build verified (`./gradlew assembleDebug`, 1m11s). **Not yet surfaced in the UI** — data layer only; a drafts/history screen is a UI/UX-phase task.
 
 ## In Progress
 
-- Task #4 (real LLM integration): backend `/generate` endpoint added (calls Groq's chat completions API server-side, `GROQ_API_KEY`/`GROQ_MODEL` configurable, returns structured JSON captions). Android side: new `LlmCaptionClient` calls this endpoint; `MainViewModel.generate()` now tries the LLM path first when the backend is configured, falling back to the existing template `CaptionGenerator` on any failure (network error, backend not configured, rate limit, malformed model output). `GenerationResult.aiGenerated` flag added so the UI can eventually distinguish AI vs. template output (not yet surfaced in the UI itself — that's part of the later UI/UX phase).
-  - Build verified: `./gradlew assembleDebug` — BUILD SUCCESSFUL (48s, incremental) after wiring in `LlmCaptionClient`.
-  - **Not yet tested against a real deployment** — `backend/` still isn't deployed anywhere (open task), so this path is code-complete but unverified end-to-end. Falls back to templates safely if backend is unreachable, so this is safe to ship as-is.
+- Task #4 (real LLM integration) — **done**, see Completed section below.
+- Task #5 (Room persistence) — **done**, see Completed section below.
 
 ## Remaining (backlog, roughly in priority order)
 

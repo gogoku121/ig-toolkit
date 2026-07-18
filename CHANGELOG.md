@@ -102,6 +102,7 @@ Auto-select, Storytelling, Before/After, Problem/Solution, Listicle, Case Study,
 - Hilt dependency injection across all engine classes and `MainViewModel`/`MainActivity`, replacing manual `ResearchEngine()`/`CaptionGenerator()` construction. Fixes the tight coupling that made unit testing impossible.
 - Real LLM-based caption generation: new `POST /generate` backend endpoint (Groq), new `LlmCaptionClient` on the Android side. Used as the primary generation path when the backend is configured, with automatic fallback to the existing offline template generator on any failure.
 - `GenerationResult.aiGenerated` flag to distinguish AI-generated vs. template-generated captions.
+- Room persistence: `DraftEntity`/`DraftDao`/`AppDatabase`, every generated caption version is now auto-saved and exposed via `MainViewModel.drafts`. No UI to browse drafts yet (data layer only).
 
 ### Fixed
 - `android-kotlin/.gradle/` (Gradle's local build cache) was accidentally tracked in git; untracked and gitignored properly.

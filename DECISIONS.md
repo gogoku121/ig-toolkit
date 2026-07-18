@@ -1,5 +1,11 @@
 # DECISIONS.md
 
+## Room persistence added at the data layer only, no UI yet
+- **Decision:** Added `DraftEntity`/`DraftDao`/`AppDatabase` (Room) and wired `MainViewModel` to auto-save every generated caption version and expose a `drafts` StateFlow. Did not add a drafts/history screen in the same pass.
+- **Reason:** The app previously lost all generated captions on process death (audit flagged this — no `SavedStateHandle`, no persistence at all). Room is the standard Android solution and was already implied by the brief. Building the data layer first, UI later, follows the same "don't bundle unrelated concerns in one diff" approach used for the Hilt refactor.
+- **Alternatives considered:** DataStore (already a dependency) — rejected for structured, queryable, growing lists of drafts; DataStore suits key-value preferences, not a table of records. SQLDelight — viable alternative to Room, but Room has tighter Hilt/Compose ecosystem integration and is the more common default.
+- **Trade-offs:** Drafts are being saved but there's no way for a user to see/browse/delete them yet — that's a real UX gap until the drafts screen is built (tracked in TASKS.md, part of the UI/UX phase which also needs Navigation Compose since the app is currently single-screen).
+
 ## Real LLM generation added as primary path, templates kept as fallback (not replaced)
 - **Decision:** Added a `/generate` endpoint to `backend/` that calls Groq's API server-side. `MainViewModel.generate()` tries this LLM path first when the backend is configured, and falls back to the existing template-based `CaptionGenerator` on any failure — network error, backend unreachable, rate limit, or malformed model output.
 - **Reason:** The audit flagged "AI capability" at 2/10 because generation was purely string templates despite being marketed as "AI-powered." Groq was chosen because a working API key already exists in the user's personal credentials store (see the assistant's memory reference for where it's stored) — no new account/signup needed to get a first real integration working. Keeping templates as a fallback (rather than deleting them) preserves the app's existing offline-capability story (ONLINE→CACHE→MEMORY→OFFLINE ladder) — a network/backend outage degrades caption quality but doesn't break the app.

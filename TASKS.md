@@ -26,6 +26,12 @@
 - **Status:** Not started.
 - **Dependencies:** Test real LLM caption generation end-to-end.
 
+### Add a drafts/history screen (UI)
+- **Priority:** Medium
+- **Description:** `MainViewModel.drafts` (Room-backed) exists but nothing in the UI shows it yet. Needs Navigation Compose (app is currently single-screen) to add a second screen without cramming it into `MainScreen.kt`.
+- **Status:** Not started.
+- **Dependencies:** None strictly, but natural to pair with the broader Navigation Compose adoption in the UI/UX phase.
+
 ## Upcoming
 
 ### Rotate exposed credentials (repo owner action)
